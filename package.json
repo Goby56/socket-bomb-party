@@ -1,0 +1,32 @@
+{
+  "name": "socket-bomb-party",
+  "version": "1.0.0",
+  "description": "Javascript school project with socket.io",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Goby56/socket-bomb-party.git"
+  },
+  "keywords": [
+    "javscript",
+    "school",
+    "project",
+    "socket.io",
+    "bomb",
+    "party"
+  ],
+  "author": "Goby56",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Goby56/socket-bomb-party/issues"
+  },
+  "homepage": "https://github.com/Goby56/socket-bomb-party#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "nodemon": "^2.0.20",
+    "socket.io": "^4.5.2"
+  }
+}
