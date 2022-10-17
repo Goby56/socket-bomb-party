@@ -4,7 +4,8 @@
   "description": "Javascript school project with socket.io",
   "main": "index.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "node test.js",
+    "start": "nodemon public/server.js --w"
   },
   "repository": {
     "type": "git",

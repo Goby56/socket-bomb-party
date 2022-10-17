@@ -1,29 +1,47 @@
-// Setup
-const express = require('express');
-const app = express();
-const http = require('http');
-const server = http.createServer(app);
+var socket = io.connect('http://localhost:3000/');
 
-// Socket.io
-const { Server } = require("socket.io");
-const io = new Server(server);
+var messages = document.getElementById('messages');
+var form = document.getElementById('form');
+var input = document.getElementById('input');
+var typingDiv = document.getElementById("typingDiv")
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+var username = prompt("Choose a username: ")
+
+
+// Handle chat input
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (input.value) {
+        message = `${username}: ${input.value}`
+        socket.emit('chat message', message);
+        input.value = '';
+    }
 });
 
-io.on('connection', (socket) => {
-    socket.broadcast.emit("user connection", socket.id)
+input.addEventListener('input', () => {
+    socket.emit("someone typing", username)
+})
 
-	socket.on('disconnect', () => {
-        socket.broadcast.emit("user disconnection", socket.id)
-    });
-
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg)
-    });
+// Add message html
+socket.on('chat message', (msg) => {
+    appendToChat(msg)
 });
+socket.on("user connection", (userID) => {
+    appendToChat(userID + " connected.")
+}) 
+socket.on("user disconnection", (userID) => {
+    appendToChat(userID + " disconnected.")
+})
+socket.on("someone typing", (username) => {
+    typingDiv.innerHTML = username
+    console.log(username)
+})
 
-server.listen(3000, () => {
-    console.log('listening on *:3000');
-});
+
+// Add item to html list
+function appendToChat(content) {
+    var item = document.createElement('li');
+    item.textContent = content;
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+}
