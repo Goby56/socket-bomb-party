@@ -9,11 +9,11 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', (socket) => {
-    socket.broadcast.emit("user connection", socket.io)
+    socket.broadcast.emit("user connection", socket.id)
 
 	socket.on('disconnect', () => {
         socket.broadcast.emit("user disconnection", socket.id)
@@ -25,5 +25,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(3000, () => {
-  console.log('listening on *:3000');
+    console.log('listening on *:3000');
 });
