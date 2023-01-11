@@ -19,16 +19,39 @@ app.get('/', (req, res) => {
 var users = {}
 var peopleTyping = []
 
+class User {
+    constructor(socket) {
+        auth = socket.io.handshake
+        this.name = auth.name
+        this.bind(socket)
+    }
+    bind(socket) {
+        socket.onAny((event, ...args) => {
+            try {
+                if (typeof this[event] === "function") this[event](...args)
+            } catch {
+                socket.emit("error", "Invalid arguments")
+            }
+        })
+        if (this.socket) {
+            this.socket.offAny();
+        }
+        this.socket = socket
+    }
+}
 
+io.use((socket, next) => {
+    auth = socket.io.handshake
+    while (users[token = btoa(Math.random())])
+    users[token] = new User(auth.name)
+    next()
+})
 
 io.on('connection', (socket) => {
-    socket.on("username handshake", (username) => {
-        users[socket.id] = username
-    })
-    socket.broadcast.emit("user connection", username)
+    socket.broadcast.emit("user connection", users[socket.id].name)
 
 	socket.on('disconnect', () => {
-        socket.broadcast.emit("user disconnection", username)
+        socket.broadcast.emit("user disconnection", users[socket.id])
     });
 
     socket.on('chat message', (msg) => {

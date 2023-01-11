@@ -1,8 +1,11 @@
+
 var username = prompt("Choose a username: ")
 // https://socket.io/docs/v4/middlewares/
-var socket = io.connect('http://localhost:3000/', );
-
-socket.emit("username handshake", username)
+var socket = io({
+    auth: {
+        name: username
+    }
+});
 
 var messages = document.getElementById('messages');
 var form = document.getElementById('form');
