@@ -1,3 +1,7 @@
+:root {
+    --transparent-color: rgba(224, 224, 224, 1);
+}
+
 body { 
     margin: 0; 
     padding-bottom: 3rem; 
@@ -48,3 +52,19 @@ body {
 
 #messages > li { padding: 0.5rem 1rem; }
 #messages > li:nth-child(odd) { background: #efefef; }
+
+.hide {
+    display: none !important;
+}
+
+.popup {
+    display: flex;
+    flex-direction: column;
+    /* row-gap: 50px; */
+    width: 80%;
+    height: 80%;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    background-color: var(--transparent-color);
+}

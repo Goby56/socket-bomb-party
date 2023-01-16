@@ -16,13 +16,14 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 }); 
 
-var users = {}
+let users = {}
+let rooms = {}
+
 var peopleTyping = []
 
 class User {
     constructor(socket) {
-        auth = socket.io.handshake
-        this.name = auth.name
+        this.socket = socket
         this.bind(socket)
     }
     bind(socket) {
@@ -43,8 +44,12 @@ class User {
 io.use((socket, next) => {
     auth = socket.io.handshake
     while (users[token = btoa(Math.random())])
-    users[token] = new User(auth.name)
+    users[token] = new User(socket)
     next()
+})
+
+io.on("joinRoom", (roomCode, callback) => {
+    callback("room does not exist")
 })
 
 io.on('connection', (socket) => {

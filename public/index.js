@@ -1,11 +1,21 @@
+let loginPrompt = document.querySelector("#login-prompt")
+let roomNameForm = loginPrompt.querySelector("#room-name-form")
 
-var username = prompt("Choose a username: ")
-// https://socket.io/docs/v4/middlewares/
-var socket = io({
-    auth: {
-        name: username
+let socket = io();
+
+roomNameForm.addEventListener("submit", e => {
+    e.preventDefault();
+    username = roomNameForm.username
+    roomCode = roomNameForm.roomCode
+    if (!username) {
+        username = `Per${Math.round(Math.random*100)}` // Randomize name if no were given
     }
-});
+    socket.username = username
+    socket.emit("joinRoom", roomCode, (successCode) => {
+        // if room doesnt exist do something
+    })
+
+})
 
 var messages = document.getElementById('messages');
 var form = document.getElementById('form');

@@ -5,11 +5,25 @@
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <ul id="messages"></ul>
-    <div id="typingDiv"></div>
-    <form id="form" action="">
-        <input id="input" autocomplete="off" /><button>Send</button>
-    </form>
+    
+    <div id="login-prompt" class="popup">
+        <form id="room-name-form">
+            <h1>Username:</h1>
+            <input type="text" name="username">
+            <h1>Room code:</h1>
+            <input type="text" name="room">
+            <input type="submit" name="enterRoom" value="Join room">
+            
+        </form>
+    </div>
+
+    <div class="hide">
+        <ul id="messages"></ul>
+        <div id="typingDiv"></div>
+        <form id="form" action="">
+            <input id="input" autocomplete="off" /><button>Send</button>
+        </form>
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="index.js"></script>
 </body>
