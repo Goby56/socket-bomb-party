@@ -42,14 +42,16 @@ class User {
 }
 
 io.use((socket, next) => {
-    auth = socket.io.handshake
     while (users[token = btoa(Math.random())])
     users[token] = new User(socket)
     next()
 })
 
 io.on("joinRoom", (roomCode, callback) => {
-    callback("room does not exist")
+    if (roomCode in rooms) {
+        callback(1)
+    }
+    callback(0)
 })
 
 io.on('connection', (socket) => {

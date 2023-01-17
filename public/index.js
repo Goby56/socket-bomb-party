@@ -1,18 +1,24 @@
 let loginPrompt = document.querySelector("#login-prompt")
 let roomNameForm = loginPrompt.querySelector("#room-name-form")
+let gameContainer = document.querySelector("#game-container")
 
 let socket = io();
 
 roomNameForm.addEventListener("submit", e => {
     e.preventDefault();
     username = roomNameForm.username
-    roomCode = roomNameForm.roomCode
     if (!username) {
         username = `Per${Math.round(Math.random*100)}` // Randomize name if no were given
     }
     socket.username = username
-    socket.emit("joinRoom", roomCode, (successCode) => {
-        // if room doesnt exist do something
+    socket.emit("joinRoom", roomNameForm.roomCode, (responseCode) => {
+        if (responseCode == 1) {
+            loginPrompt.classList.add("hide")
+            gameContainer.classList.remove("hide")
+        } else if (responseCode == 0) {
+            roomNameForm.enterRoom.value = 
+        }
+        
     })
 
 })
