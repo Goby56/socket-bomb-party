@@ -8,25 +8,15 @@
     <div id="main-container">
         <div id="login-prompt" class="popup">
             <form id="room-name-form">
-                <h1>Username:</h1>
-                <input type="text" name="username">
-                <h1>Room code:</h1>
-                <input type="text" name="roomcode">
+                <input type="text" name="username" placeholder="Username">
+                <input type="text" name="roomcode" placeholder="Room code">
             </form>
             <button id="enter-room">Create Room</button>
-        </div id="game-container" class="hide">
-        <div>
-
         </div>
+    <div id="game-container" class="hide">
+
     </div>
 
-    <div class="hide">
-        <ul id="messages"></ul>
-        <div id="typingDiv"></div>
-        <form id="form" action="">
-            <input id="input" autocomplete="off" /><button>Send</button>
-        </form>
-    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="index.js" type="module"></script>

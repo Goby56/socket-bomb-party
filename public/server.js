@@ -16,35 +16,47 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 }); 
 
-let users = {}
 let rooms = {}
 
-var peopleTyping = []
-
 class User {
+
+    static users = {}
+
     constructor(socket) {
         this.socket = socket
         this.bind(socket)
     }
 
-    static register(uuid, socket) {
-        if (!users.hasOwnProperty()) {
-            users[uuid] = new User(socket);
+    static register(socket) {
+        let uuid = socket.handshake.query.uuid
+        if (!this.users.hasOwnProperty(uuid)) {
+            this.users[uuid] = new User(socket);
         }
+    }
+
+    static get(socket) {
+        return this.users[socket.handshake.query.uuid]
     }
 
     bind(socket) {
         socket.onAny((event, ...args) => {
+            console.log(event)
             try {
                 if (typeof this[event] === "function") this[event](...args)
             } catch {
                 socket.emit("error", "Invalid arguments")
             }
         })
+        // if (this.socket) {
+        //     this.socket.offAny();
+        // }
+        // this.socket = socket
+    }
+
+    unbind() {
         if (this.socket) {
             this.socket.offAny();
         }
-        this.socket = socket
     }
 
     changeUsername(username) {
@@ -52,48 +64,22 @@ class User {
     }
 
     joinRoom(roomCode, callback) {
+        console.log(uuid)
         if (roomCode in rooms) {
             callback(1)
+        } else {
+            callback(0)  
         }
-        callback(0)
     }
 }
 
-// io.use((socket, next) => {
-//     while (users[token = btoa(Math.random())])
-//     users[token] = new User(socket)
-//     next()
-// })
-
-// io.on("joinRoom", (roomCode, callback) => {
-//     if (roomCode in rooms) {
-//         callback(1)
-//     }
-//     callback(0)
-// })
-
 io.on('connection', (socket) => {
     uuid = socket.handshake.query.uuid
-    User.register(uuid, socket)
+    User.register(socket)
 
-    socket.broadcast.emit("user connection", users[socket.id])
-
-	socket.on('disconnect', () => {
-        socket.broadcast.emit("user disconnection", users[socket.id])
+    socket.on('disconnect', () => {
+        User.get(socket).unbind()
     });
-
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg)
-    });
-
-    socket.on("started typing", (username) => {
-        
-        io.emit("people typing", username)
-    })
-
-    socket.on("stopped typing", (username) => {
-        io.emit("stopped typing", username)
-    })
 });
 
 server.listen(3000, () => {
