@@ -26,6 +26,13 @@ class User {
         this.socket = socket
         this.bind(socket)
     }
+
+    static register(uuid, socket) {
+        if (!users.hasOwnProperty()) {
+            users[uuid] = new User(socket);
+        }
+    }
+
     bind(socket) {
         socket.onAny((event, ...args) => {
             try {
@@ -39,23 +46,37 @@ class User {
         }
         this.socket = socket
     }
+
+    changeUsername(username) {
+        this.username = username
+    }
+
+    joinRoom(roomCode, callback) {
+        if (roomCode in rooms) {
+            callback(1)
+        }
+        callback(0)
+    }
 }
 
-io.use((socket, next) => {
-    while (users[token = btoa(Math.random())])
-    users[token] = new User(socket)
-    next()
-})
+// io.use((socket, next) => {
+//     while (users[token = btoa(Math.random())])
+//     users[token] = new User(socket)
+//     next()
+// })
 
-io.on("joinRoom", (roomCode, callback) => {
-    if (roomCode in rooms) {
-        callback(1)
-    }
-    callback(0)
-})
+// io.on("joinRoom", (roomCode, callback) => {
+//     if (roomCode in rooms) {
+//         callback(1)
+//     }
+//     callback(0)
+// })
 
 io.on('connection', (socket) => {
-    socket.broadcast.emit("user connection", users[socket.id].name)
+    uuid = socket.handshake.query.uuid
+    User.register(uuid, socket)
+
+    socket.broadcast.emit("user connection", users[socket.id])
 
 	socket.on('disconnect', () => {
         socket.broadcast.emit("user disconnection", users[socket.id])

@@ -1,12 +1,35 @@
+import { v4 as uuidv4 } from 'uuid';
+
 // let loginPrompt = $("#login-prompt")
-let roomNameForm = $("#room-name-form")
-let gameContainer = $("#game-container")
+let roomNameForm = $("#room-name-form");
+let gameContainer = $("#game-container");
 
-let socket = io();
+function getUuid() {
+    let uuid = window.localStorage.getItem("uuid")
+    if (!uuid) {
+        uuid = uuidv4()
+        window.localStorage.setItem("uuid", uuid)
+    }
+    return uuid;
+}
 
-roomNameForm.on("change click keyup input paste", e => {
-    let roomCode = roomNameForm.serializeArray().filter(obj => obj.name == "room")
-    console.log(roomCode)
+let socket = io({
+    query: {
+        uuid: getUuid()
+    }
+});
+
+// change click keyup input paste
+roomNameForm.on("input", event => {
+    let data = {}
+    roomNameForm.serialize().split("&").forEach(element => {
+        let [key, value] = element.split("=")
+        data[key] = value
+    })
+    socket.emit("changeUsername", data["username"])
+    socket.emit("joinRoom", data["roomcode"], (responseCode) => {
+        console.log(responseCode)
+    })
     
 })
 // roomNameForm.addEventListener("submit", e => {
