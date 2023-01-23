@@ -21,8 +21,9 @@ const crypto = require("crypto")
 const RESPONSE_CODE = {
     ROOM_NOT_FOUND: 0,
     ROOM_FULL: 1,
-
 }
+
+const PORT = 3000;
 
 class Room {
 
@@ -53,14 +54,14 @@ class Room {
         return true;
     }
 
-    remove(uuid) {
-        let removePlayerI;
+    remove(user) {
+        let indexToRemove;
         for (let i = 0; i < this.players.length; i++) {
-            if (this.players[i].uuid == uuid) {
-                removePlayerI = i
+            if (this.players[i].uuid == user.uuid) {
+                indexToRemove = i
             }
         }
-        // TODO REMOVE PLAYER
+        this.players.splice(indexToRemove, 1)
     }
 }
 
@@ -69,6 +70,7 @@ class User {
     static users = {}
 
     constructor(socket) {
+        this.uuid = socket.handshake.query.uuid
         this.bind(socket)
     }
 
@@ -119,20 +121,19 @@ class User {
     }
 
     leaveRoom() {
-        this.room.remove(this)
+        this.room.remove(this.uuid)
     }
 }
 
 io.on('connection', (socket) => {
-    uuid = socket.handshake.query.uuid
+    let uuid = socket.handshake.query.uuid
     User.register(socket)
 
     socket.on('disconnect', () => {
-
-        User.get(uuid).room.code
+        User.get(uuid).leaveRoom()
     });
 });
 
-server.listen(3000, () => {
-    console.log('listening on *:3000');
+server.listen(PORT, () => {
+    console.log(`server on localhost:${PORT}`);
 });
