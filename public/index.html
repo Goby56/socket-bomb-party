@@ -5,18 +5,29 @@
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <div></div>
-    <div id="popup-field" class="center-contents">
-        <div id="login-prompt" class="prompt-popup">
-            <form id="room-name-form">
-                <input type="text" name="username" placeholder="Username">
-                <input type="text" name="roomcode" placeholder="Room code">
-            </form>
-            <button id="enter-room">Create Room</button>
+    <div class="fill-screen"></div>
+    <section class="center-contents">
+        <div id="main-input" class="popup">
+            <div id="auth" class="center-contents column-wise">
+                <form id="room-name-form" class="center-contents column-wise">
+                    <input type="text" name="username" placeholder="username">
+                    <input type="text" name="roomcode" placeholder="room code">
+                </form>
+                <button id="enter-room">create room</button>
+            </div>
+            <div id="lobby" class="hide">
+                <button id="randomize-teams">Randomize Teams</button>
+                <button id="start-game">Start Game</button>
+                <button id="reset-teams">Reset Teams</button>
+            </div>
+            <div id="entry" class="hide">
+    
+            </div>
         </div>
-    </div>
+    </section>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="index.js" type="module"></script>
 </body>
 </html>

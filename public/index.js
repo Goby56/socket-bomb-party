@@ -1,9 +1,8 @@
 import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
 
-// let loginPrompt = $("#login-prompt")
+let mainInputDiv = $("#main-input")
 let roomNameForm = $("#room-name-form");
-let enterRoomButton = $("#enter-room")
-let gameContainer = $("#game-container");
+let enterRoomButton = $("#enter-room");
 
 function getUuid() {
     let uuid = window.localStorage.getItem("uuid")
@@ -32,16 +31,19 @@ function getFormData(form) {
 roomNameForm.on("change click keyup input paste", event => {
     // If room code is provided change button to join room
     if (getFormData(roomNameForm)["roomcode"] != "") {
-        $("#enter-room").text("Join Room")
+        $("#enter-room").text("join room")
     } else {
-        $("#enter-room").text("Create Room")
+        $("#enter-room").text("create room")
     }
 })
 
 enterRoomButton.on("click", event => {
     let data = getFormData(roomNameForm);
     socket.emit("changeUsername", data["username"]);
-    if (enterRoomButton.text() == "Create Room") {
+    mainInputDiv.toggleClass("bottom", 500)
+    $("#auth").toggleClass("hide")
+    $("#lobby").toggleClass("hide")
+    if (enterRoomButton.text() == "create room") {
         socket.emit("createRoom");
         return;
     }
