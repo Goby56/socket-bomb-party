@@ -19,8 +19,10 @@ app.get('/', (req, res) => {
 const crypto = require("crypto")
 
 const RESPONSE_CODE = {
-    ROOM_NOT_FOUND: 0,
-    ROOM_FULL: 1,
+    ROOM_NOT_FOUND: 404,
+    ROOM_FULL: 413,
+    ROOM_CREATED: 201,
+    ROOM_JOINED: 200
 }
 
 const PORT = 3000;
@@ -71,7 +73,6 @@ class User {
 
     constructor(socket) {
         this.uuid = socket.handshake.query.uuid
-        this.bind(socket)
     }
 
     static register(socket) {
@@ -79,14 +80,16 @@ class User {
         if (!this.users[uuid]) {
             this.users[uuid] = new User(socket);
         }
+        this.users[uuid].bind(socket)
     }
 
-    static get(socket) {
-        return this.users[socket.handshake.query.uuid]
+    static get(uuid) {
+        return this.users[uuid]
     }
 
     bind(socket) {
         socket.onAny((event, ...args) => {
+            console.log(event, ...args)
             try {
                 if (typeof this[event] === "function") this[event](...args)
             } catch {
@@ -112,16 +115,17 @@ class User {
             callback(RESPONSE_CODE.ROOM_FULL); return;
         }
         this.room = room
-        console.log("Joined room:", this.room.code)
+        console.log(this.uuid, "joined room:", this.room.code)
     }
 
-    createRoom() {
+    createRoom(callback) {
         this.room = Room.create(this)
-        console.log("Created room:", this.room.code)
+        callback(RESPONSE_CODE.ROOM_CREATED, this.room.code)
+        console.log(this.uuid, "created room:", this.room.code)
     }
 
     leaveRoom() {
-        this.room.remove(this.uuid)
+        this.room?.remove(this)
     }
 }
 

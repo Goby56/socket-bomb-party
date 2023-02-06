@@ -8,17 +8,24 @@
     <div class="fill-screen"></div>
     <section class="center-contents">
         <div id="main-input" class="popup">
-            <div id="auth" class="center-contents column-wise">
+            <div id="auth" class="column-wise">
                 <form id="room-name-form" class="center-contents column-wise">
                     <input type="text" name="username" placeholder="username">
                     <input type="text" name="roomcode" placeholder="room code">
                 </form>
-                <button id="enter-room">create room</button>
+                <button id="enter-room" class="large">create room</button>
             </div>
-            <div id="lobby" class="hide">
-                <button id="randomize-teams">Randomize Teams</button>
-                <button id="start-game">Start Game</button>
-                <button id="reset-teams">Reset Teams</button>
+            <div id="lobby" class="hide row-wise">
+                <div class="column-wise">
+                    <button id="randomize-teams">Randomize Teams</button>
+                    <button id="reset-teams">Reset Teams</button>
+                </div>
+                <div class="column-wise">
+                    <button id="start-game" class="large special">Start Game</button>
+                </div>
+                <div class="column-wise">
+                    <input type="text" placeholder="language">
+                </div>
             </div>
             <div id="entry" class="hide">
     

@@ -40,14 +40,21 @@ roomNameForm.on("change click keyup input paste", event => {
 enterRoomButton.on("click", event => {
     let data = getFormData(roomNameForm);
     socket.emit("changeUsername", data["username"]);
-    mainInputDiv.toggleClass("bottom", 500)
-    $("#auth").toggleClass("hide")
-    $("#lobby").toggleClass("hide")
     if (enterRoomButton.text() == "create room") {
-        socket.emit("createRoom");
+        socket.emit("createRoom", (responseCode, roomCode) => {
+            console.log(responseCode, roomCode)
+            openRoomLobby();
+        });
         return;
     }
     socket.emit("joinRoom", data["roomcode"], (responseCode) => {
         console.log(responseCode);
+        openRoomLobby();
     })
 })
+
+function openRoomLobby() {
+    mainInputDiv.toggleClass("bottom", 500)
+    $("#auth").toggleClass("hide")
+    $("#lobby").toggleClass("hide")
+}
