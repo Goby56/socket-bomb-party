@@ -1,44 +1,63 @@
 :root {
     --transparent: rgba(0, 0, 0, 0.4);
+    --black: #1e1e24;
+    --dark-gray: #36413eff;
+    --gray: #5d5e60ff;
+    --light-gray: #d7d6d6ff;
+    --white: #f5efedff;
+    --orange: #ee6123ff;
+    --red: #fa003fff;
+    --white: #f5efedff;
+    --turquoise: #34d1bfff;
+    --blue: #23b5d3ff;
     font-family: "Lucida Console";
 }
 
 body { 
     /* overflow: hidden; */
     background: rgb(51,51,51);
-    background: linear-gradient(45deg, rgba(51,51,51,1) 0%, rgba(20,20,20,1) 100%);
+    background: linear-gradient(45deg, var(--dark-gray) 0%, var(--black) 100%);
 }
 
-div {
+#auth {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: space-evenly;
     align-items: center;
 }
 
 button {
     background-color: #969696;
     border: 0;
-    border-radius: 6px;
-    box-shadow: #3f4a5e 0 -5px 3px inset;
+    border-radius: 10%;
+    box-shadow: #3f4a5e 0 -10% 5px inset;
     cursor: pointer;
-    color: #121212;
+    color: var(--black);
     font-size: 1.5rem;
     font-family: "Lucida Console";
     font-weight: 500;
-    padding: 0.7rem 0.9rem;
+    padding: 0.5rem;
     text-align: center;
-    transition: all 0.3s;
+    transition: all 0.5s;
 }
 
 button:hover {
     background-color: #bab8b8;
     box-shadow: #58657e 0 -8px 5px inset;
+    font-weight: 550;
     transform: scale(1.1);
 }
 
 button.large {
     border-radius: 10px;
     box-shadow: #3f4a5e 0 -8px 5px inset;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+button.small {
+    border-radius: 4px;
+    box-shadow: #3f4a5e 0 -5px 3px inset;
     font-size: 2rem;
     font-weight: 700;
     padding: 1rem 1.3rem;
@@ -55,16 +74,31 @@ button.special:hover {
 }
 
 input[type=text] {
-    background-color: hwb(0 59% 41%);
-    padding: 10px;
-    margin: 10px;
+    background-color: var(--light-gray);
+    padding: 0.5rem;
+    margin: 0.5rem;
     border: 0;
-    box-shadow: 0 0 15px 4px rgba(0,0,0,0.06);
-    border-radius: 20px;
+    border-radius: 10%;
     font-family: "Lucida Console";
-    color: #121212;
+    color: var(--black);
 }
 
+#game-title-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4rem;
+}
+
+#game-title-1 {
+    color: var(--orange);
+    font-size: 4rem;
+}
+
+#game-title-2 {
+    color: var(--turquoise);
+    font-size: 4rem;
+}
 
 .hide {
     display: none !important;
@@ -109,4 +143,26 @@ input[type=text] {
     width: 80%;
     height: 20%;
     border-radius: 20px 20px 0px 0px;
+}
+
+#lobby {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+#team-settings {
+    width: 25%;
+}
+
+#team-settings-label {
+    color: var(--light-gray);
+}
+
+#start-and-leave {
+    width: 25%;
+}
+
+#game-settings {
+    width: 25%;
 }
