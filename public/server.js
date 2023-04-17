@@ -7,16 +7,28 @@ app.use(express.static('public'));
 const http = require('http');
 const server = http.createServer(app);
 
+//Template engine
+const nunjucks = require('nunjucks')
+nunjucks.configure('views', {
+    autoescape: true,
+    express: app
+});
+
 // Socket.io
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+
 // app.use(express.static(__dirname + '/public'));
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.render("join.html");
 }); 
 
-const crypto = require("crypto")
+app.get("/room/:roomCode", (req, res) => {
+    res.render("room.html", req.params)
+})
+
+const crypto = require("crypto") // Used to generate random room codes
 
 const RESPONSE_CODE = {
     ROOM_NOT_FOUND: 404,

@@ -1,0 +1,21 @@
+{% extends "parent.html" %}
+
+{% block body %}
+<section class="center-contents">
+    <div id="main-input" class="popup">
+        <div id="lobby">
+            <div id="team-settings">
+                <p id="team-settings-label">Team settings</p>
+                <button id="randomize-teams" class="small">randomize</button>
+                <button id="reset-teams" class="small">reset</button>
+            </div>
+            <div id="start-and-leave">
+                <button id="start-game" class="large special">Start Game</button>
+            </div>
+            <div id="game-settings">
+                <input type="text" placeholder="language">
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock body %}

@@ -43,18 +43,16 @@ enterRoomButton.on("click", event => {
     if (enterRoomButton.text() == "create room") {
         socket.emit("createRoom", (responseCode, roomCode) => {
             console.log(responseCode, roomCode)
-            openRoomLobby();
+            enterRoom(roomCode);
         });
         return;
     }
     socket.emit("joinRoom", data["roomcode"], (responseCode) => {
         console.log(responseCode);
-        openRoomLobby();
+        enterRoom(roomCode);
     })
 })
 
-function openRoomLobby() {
-    mainInputDiv.toggleClass("bottom", 500)
-    $("#auth").toggleClass("hide")
-    $("#lobby").toggleClass("hide")
+function enterRoom(roomCode) {
+    window.location = "/room/" + roomCode
 }
