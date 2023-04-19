@@ -2,7 +2,7 @@
 const express = require('express');
 const app = express();
 
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 const http = require('http');
 const server = http.createServer(app);
@@ -31,6 +31,7 @@ app.get("/room/:roomCode", (req, res) => {
 const crypto = require("crypto") // Used to generate random room codes
 
 const RESPONSE_CODE = {
+    ROOM_FOUND: 302,
     ROOM_NOT_FOUND: 404,
     ROOM_FULL: 413,
     ROOM_CREATED: 201,
@@ -60,10 +61,17 @@ class Room {
         return this.rooms[roomCode]
     }
 
+    isFull() {
+        return this.players.length >= this.maxSize
+    }
+
     add(user) {
-        if (this.players.length >= this.maxSize) {
-            return false;
+        if (this.isFull) {
+            return false
         }
+        // if (user in this.players) {
+        //     console.log("USER IN ROOM")
+        // }
         this.players.push(user);
         return true;
     }
@@ -101,7 +109,7 @@ class User {
 
     bind(socket) {
         socket.onAny((event, ...args) => {
-            console.log(event, ...args)
+            // console.log(event, ...args)
             try {
                 if (typeof this[event] === "function") this[event](...args)
             } catch {
@@ -123,11 +131,12 @@ class User {
         if (room == undefined) {
             callback(RESPONSE_CODE.ROOM_NOT_FOUND); return;
         }
-        if (!room.add(this.socket)) {
+        if (room.isFull()) {
             callback(RESPONSE_CODE.ROOM_FULL); return;
         }
         this.room = room
         console.log(this.uuid, "joined room:", this.room.code)
+        callback(RESPONSE_CODE.ROOM_JOINED)
     }
 
     createRoom(callback) {
@@ -136,7 +145,19 @@ class User {
         console.log(this.uuid, "created room:", this.room.code)
     }
 
+    existingRoom(roomCode, callback) {
+        let room = Room.get(roomCode)
+        if (!room) {
+            callback(RESPONSE_CODE.ROOM_NOT_FOUND); return;
+        }
+        if (!room.isFull) {
+            callback(RESPONSE_CODE.ROOM_FULL); return;
+        }
+        callback(RESPONSE_CODE.ROOM_FOUND)
+    }
+
     leaveRoom() {
+        console.log(this.uuid, "leaved room:", this.room.code)
         this.room?.remove(this)
     }
 }
@@ -146,7 +167,7 @@ io.on('connection', (socket) => {
     User.register(socket)
 
     socket.on('disconnect', () => {
-        User.get(uuid).leaveRoom()
+        // User.get(uuid).leaveRoom()
     });
 });
 

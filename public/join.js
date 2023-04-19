@@ -1,23 +1,9 @@
-import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
+import { connectSocket } from "./auth.js"
+let socket = connectSocket()
 
 let mainInputDiv = $("#main-input")
 let roomNameForm = $("#room-name-form");
 let enterRoomButton = $("#enter-room");
-
-function getUuid() {
-    let uuid = window.localStorage.getItem("uuid")
-    if (!uuid) {
-        uuid = uuidv4()
-        window.localStorage.setItem("uuid", uuid)
-    }
-    return uuid;
-}
-
-let socket = io({
-    query: {
-        uuid: getUuid()
-    }
-});
 
 function getFormData(form) {
     let data = {};
@@ -47,9 +33,11 @@ enterRoomButton.on("click", event => {
         });
         return;
     }
-    socket.emit("joinRoom", data["roomcode"], (responseCode) => {
+    socket.emit("existingRoom", data["roomcode"], (responseCode) => {
         console.log(responseCode);
-        enterRoom(roomCode);
+        if (responseCode == 302) {
+            enterRoom(data["roomcode"]);
+        }
     })
 })
 
