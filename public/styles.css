@@ -2,7 +2,8 @@
     --transparent: rgba(0, 0, 0, 0.4);
     --black: #020202ff;
     --black2: rgb(40, 40, 37);
-    --gray: #878472ff;
+    --dark-gray: rgb(81, 79, 70);
+    --light-gray: #878472ff;
     --accent1: #ad343eff;
     --accent2: #06aed5ff;
     --white: #fffbfaff;
@@ -18,6 +19,10 @@ body {
     /* overflow: hidden; */
     background: var(--black2);
     /* background-image: url("images/black-water.webp"); */
+}
+
+p {
+    margin: 0;
 }
 
 .center {
