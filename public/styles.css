@@ -1,0 +1,60 @@
+:root {
+    --transparent: rgba(0, 0, 0, 0.4);
+    --black: #020202ff;
+    --black2: rgb(40, 40, 37);
+    --gray: #878472ff;
+    --accent1: #ad343eff;
+    --accent2: #06aed5ff;
+    --white: #fffbfaff;
+    font-family: "Lucida Console";
+}
+
+body { 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    height: 100vh;
+    /* overflow: hidden; */
+    background: var(--black2);
+    /* background-image: url("images/black-water.webp"); */
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.vertical {
+    display: flex;
+    flex-direction: column;
+}
+
+.accent1 {
+    color: var(--accent1);
+}
+
+.accent2 {
+    color: var(--accent2);
+}
+
+.popup {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    /* From https://css.glass */
+    background: rgba(255, 255, 255, 0.09);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(11.1px);
+    -webkit-backdrop-filter: blur(11.1px);
+    border: 1px solid rgba(255, 255, 255, 0.31);
+}

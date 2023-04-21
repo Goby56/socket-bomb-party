@@ -1,169 +1,74 @@
-:root {
-    --transparent: rgba(0, 0, 0, 0.4);
-    --black: #1e1e24;
-    --dark-gray: #36413eff;
-    --gray: #5d5e60ff;
-    --light-gray: #d7d6d6ff;
-    --white: #f5efedff;
-    --orange: #ee6123ff;
-    --red: #fa003fff;
-    --white: #f5efedff;
-    --turquoise: #34d1bfff;
-    --blue: #23b5d3ff;
-    font-family: "Lucida Console";
-}
+@import url("/styles.css");
 
-body { 
-    /* overflow: hidden; */
-    background: rgb(51,51,51);
-    background: linear-gradient(45deg, var(--dark-gray) 0%, var(--black) 100%);
-    /* background-image: url("images/black-water.webp"); */
-}
-
-#auth {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: center;
-}
-
-button {
-    background-color: #969696;
-    border: 0;
-    border-radius: 10%;
-    box-shadow: #3f4a5e 0 -10% 5px inset;
-    cursor: pointer;
-    color: var(--black);
-    font-size: 1.5rem;
-    font-family: "Lucida Console";
-    font-weight: 500;
-    padding: 0.5rem;
-    text-align: center;
-    transition: all 0.5s;
-}
-
-button:hover {
-    background-color: #bab8b8;
-    box-shadow: #58657e 0 -8px 5px inset;
-    font-weight: 550;
-    transform: scale(1.1);
-}
-
-button.large {
-    border-radius: 10px;
-    box-shadow: #3f4a5e 0 -8px 5px inset;
-    font-size: 2rem;
-    font-weight: 700;
-}
-
-button.small {
-    border-radius: 4px;
-    box-shadow: #3f4a5e 0 -5px 3px inset;
-    font-size: 2rem;
-    font-weight: 700;
-    padding: 1rem 1.3rem;
-}
-
-button.special {
-    box-shadow: #49608b !important;
-    /* background-color: none; */
-    background-image: linear-gradient(0deg, #e7ac3f, #e93e00)
-}
-
-button.special:hover {
-    background-position: bottom top;
-}
-
-input[type=text] {
-    background-color: var(--light-gray);
-    padding: 0.5rem;
-    margin: 0.5rem;
-    border: 0;
-    border-radius: 10%;
-    font-family: "Lucida Console";
-    color: var(--black);
-}
-
-#game-title-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 4rem;
-}
-
-#game-title-1 {
-    color: var(--orange);
-    font-size: 4rem;
-}
-
-#game-title-2 {
-    color: var(--turquoise);
-    font-size: 4rem;
-}
-
-.hide {
-    display: none !important;
-}
-
-.occupy-full {
+#room {
+    display: grid;
     width: 100%;
     height: 100%;
+    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-rows: repeat(2, 2fr) 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
 }
 
-.center-contents {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+#game-board {
+    grid-area: 1 / 2 / 3 / 3;
+    border: 2px solid var(--white);
+
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 5px;
 }
 
-.row-wise {
-    flex-direction: row;
+#team1-container {
+    grid-area: 1 / 1 / 2 / 2;
 }
 
-.column-wise {
-    flex-direction: column;
+#team2-container {
+    grid-area: 2 / 1 / 3 / 2;
 }
 
-.popup {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: var(--transparent);
-    padding: 1rem;
+#game-log {
+    grid-area: 1 / 3 / 3 / 4;
+}
+
+#input-field {
+    grid-area: 3 / 2 / 4 / 3; 
+}
+
+.agent-card {
+    background-color: transparent;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px; /* Remove this if you don't want the 3D effect */
+}
+
+.agent-card-inner {
+    /* position: relative; */
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.agent-card:hover .agent-card-inner {
+    transform: rotateY(180deg);
+}
+
+.agent-card-front, .agent-card-back {
     position: absolute;
-
-    bottom: 25%;
-    width: 30%;
-    height: 60%;
-    border-radius: 20px 20px 20px 20px;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden; /* Safari */
+    backface-visibility: hidden;
+    border-radius: 10px;
 }
 
-.popup.bottom {
-    bottom: 0%;
-    width: 80%;
-    height: 20%;
-    border-radius: 20px 20px 0px 0px;
+.agent-card-front {
+    background-color: var(--accent1);
 }
 
-#lobby {
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-}
-
-#team-settings {
-    width: 25%;
-}
-
-#team-settings-label {
-    color: var(--light-gray);
-}
-
-#start-and-leave {
-    width: 25%;
-}
-
-#game-settings {
-    width: 25%;
+.agent-card-back {
+    background-color: var(--accent2);
+    transform: rotateY(180deg);
 }

@@ -1,8 +1,14 @@
 {% extends "parent.html" %}
 
 {% block body %}
-<section class="center-contents">
-    <div id="main-input" class="popup">
+<div class="center vertical">
+    <h1><i class="accent1">CODE</i> <i class="accent2">NAMES</i></h1>
+    <form id="room-name-form" class="center vertical">
+        <input type="text" name="username" placeholder="username">
+        <input type="text" name="roomcode" placeholder="room code">
+    </form>
+    <button id="submit-button">create room</button>
+    <!-- <div id="main-input" class="popup">
         <div id="auth">
             <div id="game-title-container">
                 <h1 id="game-title-1">CODE</h1><h1 id="game-title-2">NAMES</h1>
@@ -10,11 +16,12 @@
             <form id="room-name-form" class="center-contents column-wise">
                 <input type="text" name="username" placeholder="username">
                 <input type="text" name="roomcode" placeholder="room code">
+                <input type="button" value="create room">
             </form>
             <button id="enter-room" class="large">create room</button>
         </div>
-    </div>
-</section>
+    </div> -->
+</div>
 {% endblock body %}
 
 {% block scripts%}

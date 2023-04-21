@@ -1,7 +1,32 @@
 {% extends "parent.html" %}
 
 {% block body %}
-<section class="center-contents">
+<div id="room">
+    <section id="game-board">
+        
+    </section>
+    <section id="team1-container"></section>
+    <section id="team2-container"></section>
+    <section id="game-log"></section>
+    <section id="input-field"></section>
+</div>
+<div class="popup vertical">
+    <h1><i class="accent1">CODE</i> <i class="accent2">NAMES</i></h1>
+    <div id="host-settings">
+        <div id="team-settings">
+            <h2>Team settings</h2>
+            <button id="randomize-teams" class="small">randomize</button>
+            <button id="reset-teams" class="small">reset</button>
+        </div>
+        <div id="game-settings">
+            <h2>Game settings</h2>
+            <input type="text" placeholder="language">
+        </div> 
+        <button id="start-game">start game</button>
+    </div>
+    <button id="leave-game">leave game</button>     
+</div>
+<!-- <section class="center-contents">
     <div id="main-input" class="popup">
         <div id="lobby">
             <div id="team-settings">
@@ -17,7 +42,7 @@
             </div>
         </div>
     </div>
-</section>
+</section> -->
 {% endblock body %}
 
 {% block scripts %}

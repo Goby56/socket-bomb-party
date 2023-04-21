@@ -1,9 +1,8 @@
 import { connectSocket } from "./auth.js"
 let socket = connectSocket()
 
-let mainInputDiv = $("#main-input")
 let roomNameForm = $("#room-name-form");
-let enterRoomButton = $("#enter-room");
+let submitButton = $("#submit-button")
 
 function getFormData(form) {
     let data = {};
@@ -17,16 +16,16 @@ function getFormData(form) {
 roomNameForm.on("change click keyup input paste", event => {
     // If room code is provided change button to join room
     if (getFormData(roomNameForm)["roomcode"] != "") {
-        $("#enter-room").text("join room")
+        submitButton.text("join room")
     } else {
-        $("#enter-room").text("create room")
+        submitButton.text("create room")
     }
 })
 
-enterRoomButton.on("click", event => {
+submitButton.on("click", event => {
     let data = getFormData(roomNameForm);
     socket.emit("changeUsername", data["username"]);
-    if (enterRoomButton.text() == "create room") {
+    if (submitButton.text() == "create room") {
         socket.emit("createRoom", (responseCode, roomCode) => {
             console.log(responseCode, roomCode)
             enterRoom(roomCode);
