@@ -1,6 +1,5 @@
 import { connectSocket } from "./auth.js"
 let socket = connectSocket()
-
 let roomNameForm = $("#room-name-form");
 let submitButton = $("#submit-button")
 
@@ -38,6 +37,13 @@ submitButton.on("click", event => {
             enterRoom(data["roomcode"]);
         }
     })
+})
+
+$(".available-room").on("click", event => {
+    let data = getFormData(roomNameForm);
+    socket.emit("changeUsername", data["username"]);
+    let roomCode = $(event.currentTarget).children("#room-code-text").text()
+    enterRoom(roomCode)
 })
 
 function enterRoom(roomCode) {

@@ -9,12 +9,6 @@ function getUuid() {
     return uuid;
 }
 
-// let socket = io({
-//     query: {
-//         uuid: getUuid()
-//     }
-// });
-
 function connectSocket() {
     return io({
         query: {

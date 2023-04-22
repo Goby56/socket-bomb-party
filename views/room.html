@@ -1,52 +1,80 @@
 {% extends "parent.html" %}
 
 {% block body %}
-<div id="room">
-    <section id="game-board">
-        
+<div id="room-container">
+    <section id="top-left-container" class="center">
+        <a href="/"><h2><i class="accent1">CODE</i> <i class="accent2">NAMES</i></h2></a>
     </section>
-    <section id="team1-container"></section>
-    <section id="team2-container"></section>
-    <section id="game-log"></section>
-    <section id="input-field">
-        <button id="-reveal-all">reveal</button>
-    </section>
-</div>
-<div class="popup vertical">
-    <h1><i class="accent1">CODE</i> <i class="accent2">NAMES</i></h1>
-    <div id="host-settings">
-        <div id="team-settings">
-            <h2>Team settings</h2>
-            <button id="randomize-teams" class="small">randomize</button>
-            <button id="reset-teams" class="small">reset</button>
-        </div>
-        <div id="game-settings">
-            <h2>Game settings</h2>
-            <input type="text" placeholder="language">
-        </div> 
-        <button id="start-game">start game</button>
-    </div>
-    <button id="leave-game">leave game</button>     
-</div>
-<!-- <section class="center-contents">
-    <div id="main-input" class="popup">
-        <div id="lobby">
-            <div id="team-settings">
-                <p id="team-settings-label">Team settings</p>
+    <section id="game-board" class="center">
+        <div id="host-settings" class="hide center vertical">
+            <div id="team-settings" class="center vertical">
+                <h2>Team settings</h2>
                 <button id="randomize-teams" class="small">randomize</button>
                 <button id="reset-teams" class="small">reset</button>
             </div>
-            <div id="start-and-leave">
-                <button id="start-game" class="large special">Start Game</button>
-            </div>
-            <div id="game-settings">
+            <div id="game-settings" class="center vertical">
+                <h2>Game settings</h2>
                 <input type="text" placeholder="language">
-            </div>
+            </div> 
+            <button id="start-game">start game</button>
         </div>
-    </div>
-</section> -->
+    </section>
+    <section id="top-right-container"></section>
+    <section id="team1-container">
+        <div class="role-container">
+            <div class="center">
+                <p>Operative(s)</p>
+                <button id="join-team1-operative">join</button>
+            </div>
+            <div class="role-players-list"></div>
+        </div>
+        <div class="role-container">
+            <div class="center">
+                <p>Spymaster(s)</p>
+                <button id="join-team1-spymaster">join</button>
+            </div>
+            <div class="role-players-list"></div>
+        </div>
+    </section>
+    <section id="team2-container">
+        <div class="role-container">
+            <div class="center">
+                <p>Operative(s)</p>
+                <button id="join-team2-operative">join</button>
+            </div>
+            <div class="role-players-list"></div>
+        </div>
+        <div class="role-container">
+            <div class="center">
+                <p>Spymaster(s)</p>
+                <button id="join-team2-spymaster">join</button>
+            </div>
+            <div class="role-players-list"></div>
+        </div>
+    </section>
+    <section id="game-info">
+        <div id="game-log">
+            <ul id="log-contents"></ul>
+            <form id="log-input" class="center">
+                <input type="text" id="log-input-field" placeholder="say something">
+            </form>
+        </div>
+        <div id="spectators"></div>
+    </section>
+    <section id="bottom-left-container" class="center">
+        <h2>{{ roomCode }}</h2>
+    </section>
+    <section id="bottom-right-container" class="center">
+        <form action="/">
+            <button id="leave-game">leave game</button>
+        </form>
+    </section>
+    <section id="input-field" class="center">
+    </section>
+</div>
 {% endblock body %}
 
 {% block scripts %}
+{{ super() }}
 <script src="/room.js" type="module"></script>
 {% endblock scripts %}

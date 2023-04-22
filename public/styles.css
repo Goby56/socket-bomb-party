@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Pathway+Extreme:wght@100&display=swap');
+
 :root {
     --transparent: rgba(0, 0, 0, 0.4);
     --black: #020202ff;
@@ -7,7 +9,7 @@
     --accent1: #ad343eff;
     --accent2: #06aed5ff;
     --white: #fffbfaff;
-    font-family: "Lucida Console";
+    font-family: "Pathway Extreme";
 }
 
 body { 
@@ -23,6 +25,24 @@ body {
 
 p {
     margin: 0;
+    color: var(--white);
+}
+
+h1 {
+    font-size: 4rem
+}
+
+h2 {
+    font-size: 3rem;
+}
+
+a {
+    text-decoration: none;
+}
+
+.hide {
+    display: none !important;
+    grid-area: 0 / 0 / 0 / 0 !important;
 }
 
 .center {
@@ -55,6 +75,16 @@ p {
     left: 50%;
     transform: translate(-50%, -50%);
 
+    /* From https://css.glass */
+    background: rgba(255, 255, 255, 0.09);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(11.1px);
+    -webkit-backdrop-filter: blur(11.1px);
+    border: 1px solid rgba(255, 255, 255, 0.31);
+}
+
+.glass {
     /* From https://css.glass */
     background: rgba(255, 255, 255, 0.09);
     border-radius: 16px;
