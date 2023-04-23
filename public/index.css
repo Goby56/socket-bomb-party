@@ -69,7 +69,7 @@
     grid-area: 3 / 1 / 4 / 2;
 }
 
-#game-log {
+#game-info {
     grid-area: 2 / 3 / 4 / 4;
 }
 
@@ -135,9 +135,33 @@
     background-repeat: no-repeat;
     background-position: center center;  */
     background: linear-gradient(0deg, 
-        rgba(255,255,255,1) 0%, rgba(255,255,255,1) 10%, 
-        rgba(33,33,33,1) 10%, rgba(15,15,15,1) 60%, 
-        rgba(255,255,255,1) 60%, rgba(255,255,255,1) 100%
+        var(--light-gray) 0%, var(--light-gray) 10%, 
+        var(--white) 10%, var(--white) 60%, 
+        var(--light-gray) 60%, var(--light-gray) 100%
+    );
+}
+
+.agent-card-front.team1 {
+    background: linear-gradient(0deg, 
+        var(--accent1) 0%, var(--accent1) 10%, 
+        var(--white) 10%, var(--white) 60%, 
+        var(--accent1) 60%, var(--accent1) 100%
+    );
+}
+
+.agent-card-front.team2 {
+    background: linear-gradient(0deg, 
+        var(--accent2) 0%, var(--accent2) 10%, 
+        var(--white) 10%, var(--white) 60%, 
+        var(--accent2) 60%, var(--accent2) 100%
+    );
+}
+
+.agent-card-front.assassin {
+    background: linear-gradient(0deg, 
+        var(--black) 0%, var(--black) 10%, 
+        var(--white) 10%, var(--white) 60%, 
+        var(--black) 60%, var(--black) 100%
     );
 }
 
@@ -152,7 +176,6 @@
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 1.5rem;
-    color: var(--black);
 }
 
 .name-label2 {
@@ -161,7 +184,6 @@
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 1rem;
-    color: var(--black);
 }
 
 .agent-codename {
@@ -169,4 +191,5 @@
     top: 65%;
     left: 50%;
     transform: translate(-50%, -50%);
+    color: var(--black);
 }

@@ -24,6 +24,7 @@ const RESPONSE_CODE = {
     OK: 200,
     CREATED: 201,
     FOUND: 302,
+    BAD_REQUEST: 400,
     NOT_FOUND: 404,
     FULL: 413,
 }
@@ -33,7 +34,7 @@ const PORT = 3000;
 class Game {
     constructor() {
         this.codenames = [...Array(25).keys()]
-        // 4: assassin, 3: npc, 1: team 1 (-1 revealed), 2: team 2 (-2 revealed)
+        // 4: assassin, 3: npc, 1: team 1, 2: team 2, negative values are revealed cards
         this.trueIdentities = [4, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2]
         this.revealedIdentities = new Array(25).fill(0)
         this.startingTeam = crypto.randomInt(2) + 1
@@ -46,12 +47,13 @@ class Game {
     }
 
     getState(user) {
-        let identities = this.trueIdentities
-        if (!user.isSpymaster()) {
-            identities.forEach((trueID, i) => {
-                return trueID * this.revealedIdentities[i]
-            })
-        }
+        let identities = this.trueIdentities.map((trueID, i) => {
+            if (!user.isSpymaster()) {
+                return trueID * this.revealedIdentities[i] // Mask
+            }
+            return trueID
+        })
+        console.log(user.username, identities)
         return {
             codenames: this.codenames,
             identities: identities,
@@ -62,7 +64,12 @@ class Game {
     }
 
     revealAgent(row, column) {
-        this.revealedIdentities[row*5 + column] = 1
+        if (this.revealedIdentities[row*5 + column]) {
+            return false;
+        }
+        this.revealedIdentities[row*5 + column] += 1
+        this.trueIdentities[row*5 + column] *= -1 
+        return true;
     }
 }
 
@@ -76,7 +83,6 @@ class Room {
         this.code = roomCode
         this.host = hostUser
         this.gameStarted = false
-        this.gameLog = []
         this.teams = [
             [],
             { spymasters: [], operatives: [] },
@@ -96,26 +102,22 @@ class Room {
         return this.rooms[roomCode]
     }
 
-    getState() {
-        let extractNames = function (team) {
+    getPlayerList() {
+        return this.players.map(player => {
             return {
-                spymasters: team.spymasters.map(player => {
-                    return player.username
-                }),
-                operatives: team.operatives.map(player => {
-                    return player.username
-                })
+                username: player.username,
+                role: player.role,
+                isHost: player.isHost()
             }
-        }
+        })
+    }
+
+    getState(user) {
         return {
-            host: this.host.username,
             gameStarted: this.gameStarted,
-            team1: extractNames(this.teams[1]),
-            team2: extractNames(this.teams[2]),
-            spectators: this.teams[0].map(player => {
-                return player.username
-            }),
-            gameLog: this.gameLog
+            team: user.role[0],
+            role: user.role[1],
+            ...this.game.getState(user)
         }
     }
 
@@ -123,18 +125,15 @@ class Room {
         return this.players.length >= this.maxSize
     }
 
-    isHost(user) {
-        return user == this.host
-    }
-
-    add(user) {
-        if (this.isFull) {
+    addUser(user) {
+        if (this.isFull()) {
             return false
         }
-        // if (user in this.players) {
-        //     console.log("USER IN ROOM")
-        // }
+        if (this.players.includes(user)) {
+            return true
+        }
         this.players.push(user);
+        user.room = this
         return true;
     }
 
@@ -155,6 +154,7 @@ class User {
 
     constructor(socket) {
         this.uuid = socket.handshake.query.uuid
+        this.role = [0, "spectator"] // [<0-2>, <"spectator"|"operative"|"spymaster"]
     }
 
     static register(socket) {
@@ -174,8 +174,11 @@ class User {
     }
 
     isSpymaster() {
-        let spymasters = [...this.room.teams.one.spymasters, ...this.room.teams.two.spymasters]
-        return spymasters.includes(this)
+        return this.role[1] == "spymaster"
+    }
+
+    isHost() {
+        return this == this.room.host
     }
 
     bind(socket) {
@@ -192,10 +195,19 @@ class User {
         this.socket = socket
     }
 
-    changeUsername(username) {
-        this.sendToRoom("playerChangedName", this.username, username, this.room.getState())
-        console.log(this.uuid, "changed name")
+    changeUsername(username, callback) {
+        if (!username) {
+            callback(RESPONSE_CODE.BAD_REQUEST); return;
+        }
+        let prevName = this.username
         this.username = username
+        console.log(this.uuid, "changed name")
+        if (this.room) {
+            if (username != prevName) {
+                this.sendToRoom("playerChangedName", prevName, username, this.room.getPlayerList())
+            } 
+        }
+        callback(RESPONSE_CODE.OK);
     }
 
     joinRoom(roomCode, callback) {
@@ -203,13 +215,15 @@ class User {
         if (room == undefined) {
             callback(RESPONSE_CODE.NOT_FOUND); return;
         }
-        if (room.isFull()) {
+        if (!room.addUser(this)) {
             callback(RESPONSE_CODE.FULL); return;
         }
-        this.room = room
         this.socket.join(roomCode)
-        console.log(this.uuid, "joined room:", this.room.code)
-        callback(RESPONSE_CODE.JOINED, room.isHost(this), room.getState(), room.game.getState(this))
+        console.log(this.uuid, "joined room:", room.code)
+        this.switchTeams(0, "spectator")
+        callback(RESPONSE_CODE.FOUND, this.isHost(), room.getState(this), this.room.getPlayerList()); 
+        // TODO maybe remove sending player list in callback
+        this.sendToRoom("playerJoined", this.username, this.room.getPlayerList()) 
     }
 
     createRoom(callback) {
@@ -231,12 +245,18 @@ class User {
 
     leaveRoom() {
         console.log(this.uuid, "leaved room:", this.room.code)
+        this.room
         this.room?.remove(this)
+        this.socket.leave(this.room.code)
+        this.sendToRoom("playerLeft", this.username, this.room.getPlayerList())
     }
 
-    hostStartedGame(callback) {
+    startGame(callback) {
         callback(RESPONSE_CODE.OK)
-        this.sendToRoom("startGame", this.room.game.getState(this))
+        this.room.gameStarted = true
+        for (let uuid of Object.keys(User.users)) {
+            this.sendToRoom("hostStartedGame", this.room.getState(User.get(uuid)))
+        }
     }
 
     sendMessage(message) {
@@ -245,35 +265,31 @@ class User {
     }
 
     revealAgent(row, column) {
-        this.room.game.revealAgent(row, column)
-        this.sendToRoom("operativeGuessed", row, column, this.room.game.getState(this))
+        if (this.room.game.revealAgent(row, column)) {
+            this.sendToRoom("operativeGuessed", row, column, this.room.getState(this))
+        }
     }
 
-    switchTeams(team, role) {
-        for (let i = 0; i < 3; i++) {
-            try {
-                this.room.teams[i].spymasters.remove(this)
-                this.room.teams[i].operatives.remove(this)
-            } catch {
-                this.room.teams[i].remove(this)
-            }
+    switchTeams(team, role, callback) {
+        if (this.room.gameStarted & this.role[0] != 0) {
+            return;
         }
-        if (team == 0) {
-            this.room.teams[team].push(this)
-        } else {
-            this.room.teams[team][role].push(this)
+        this.role = [team, role]
+        if (team) {
+            this.sendToRoom("playerSwitchedTeam", this.room.getPlayerList())
+            callback(this.room.gameStarted)
         }
-        this.sendToRoom("playerSwitchedTeams", this.room.getState())
     }
 }
 
 io.on('connection', (socket) => {
     let uuid = socket.handshake.query.uuid
     User.register(socket)
+    // TODO socket recognition to save previous name
 
     socket.on('disconnecting', () => {
-        if (socket.rooms.length > 1) {
-            io.to(socket.rooms[1]).emit("playerLeft", User.get(uuid).username)
+        if (socket.rooms.size > 1) {
+            User.get(uuid).leaveRoom()
         }
         // io.to(socket.rooms)
         // User.get(uuid).leaveRoom()

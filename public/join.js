@@ -13,7 +13,7 @@ function getFormData(form) {
 }
 
 roomNameForm.on("change click keyup input paste", event => {
-    // If room code is provided change button to join room
+    // Changes button value to "join room" if room code is provided
     if (getFormData(roomNameForm)["roomcode"] != "") {
         submitButton.text("join room")
     } else {
@@ -23,27 +23,41 @@ roomNameForm.on("change click keyup input paste", event => {
 
 submitButton.on("click", event => {
     let data = getFormData(roomNameForm);
-    socket.emit("changeUsername", data["username"]);
-    if (submitButton.text() == "create room") {
-        socket.emit("createRoom", (responseCode, roomCode) => {
-            console.log(responseCode, roomCode)
-            enterRoom(roomCode);
-        });
-        return;
-    }
-    socket.emit("existingRoom", data["roomcode"], (responseCode) => {
-        console.log(responseCode);
-        if (responseCode == 302) {
-            enterRoom(data["roomcode"]);
+    socket.emit("changeUsername", data["username"], (responseCode) => {
+        if (responseCode == 400) {
+            // TODO BETTER NAME ERROR
+            alert("Please provide an username")
+            return;
         }
-    })
+        if (submitButton.text() == "create room") {
+            socket.emit("createRoom", (responseCode, roomCode) => {
+                enterRoom(roomCode);
+            });
+            return;
+        }
+        socket.emit("existingRoom", data["roomcode"], (responseCode) => {
+            if (responseCode == 404) {
+                // TODO BETTER ERROR
+                alert("Room doesn't exist")
+                return;
+            }
+            enterRoom(data["roomcode"]);
+        })
+    });
+    
 })
 
 $(".available-room").on("click", event => {
     let data = getFormData(roomNameForm);
-    socket.emit("changeUsername", data["username"]);
-    let roomCode = $(event.currentTarget).children("#room-code-text").text()
-    enterRoom(roomCode)
+    socket.emit("changeUsername", data["username"], (responseCode) => {
+        if (responseCode == 400) {
+            // TODO BETTER NAME ERROR
+            alert("Please provide an username")
+            return;
+        }
+        let roomCode = $(event.currentTarget).children("#room-code-text").text()
+        enterRoom(roomCode)
+    });
 })
 
 function enterRoom(roomCode) {
