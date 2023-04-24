@@ -28,7 +28,9 @@ function updateTeams(playerList) {
 }
 
 function updateState(state) {
+    console.log(state)
     if (state.gameStarted) {
+        revealIdentities(state.identities, state.agentImages)
         if (state.team) {
             $(".join-team-button").toArray().forEach(button => {
                 let btn = $(button)
@@ -37,22 +39,30 @@ function updateState(state) {
                 }
             })
         }
-        revealIdentities(state.identities)
     }
 }
 
-function revealIdentities(identities) {
+function revealIdentities(identities, images) {
     let cards = $(".agent-card-inner").toArray()
     for (let r = 0; r < 5; r++) {
         for (let c = 0; c < 5; c++) {
             let id = identities[r*5 + c]
             let card = $(cards[r*5 + c])
-            if (id == 0) return;
+            if (id == 0) continue;
             if (id < 0) {
-                console.log("REVEALED IS")
-                // TODO IMPLEMENT REVEALED CARDS
+                let cardBack = $(card.children(".agent-card-back"))
+                cardBack.empty()
+                cardBack.append(`<img src="/images/agents/${images[r*5 + c]}">`)
                 if (!card.hasClass("flip")) {
                     card.addClass("flip")
+                }
+                cardBack.removeClass("team1 team2 assasin")
+                if (id == -1) {
+                    cardBack.addClass("team1")
+                } else if (id == -2) {
+                    cardBack.addClass("team2")
+                } else if (id == -4) {
+                    cardBack.addClass("assassin")
                 }
             } else if (id > 0) {
                 let cardFront = $(card.children(".agent-card-front"))
@@ -126,7 +136,6 @@ socket.on("playerSentMessage", (sender, message) => {
 })
 socket.on("hostStartedGame", state => {
     $("#log-contents").append(`<p>game started!</p>`)
-    console.log(state)
     revealBoard(state.codenames)
     updateState(state)
 })

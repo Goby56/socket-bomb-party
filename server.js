@@ -20,6 +20,10 @@ const io = new Server(server);
 
 const crypto = require("crypto") // Used to generate random room codes
 
+const fs = require('fs');
+
+let agentImages = fs.readdirSync("public/images/agents");
+
 const RESPONSE_CODE = {
     OK: 200,
     CREATED: 201,
@@ -35,27 +39,36 @@ class Game {
     constructor() {
         this.codenames = [...Array(25).keys()]
         // 4: assassin, 3: npc, 1: team 1, 2: team 2, negative values are revealed cards
-        this.trueIdentities = [4, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2]
+        this.trueIdentities = [1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4]
         this.revealedIdentities = new Array(25).fill(0)
         this.startingTeam = crypto.randomInt(2) + 1
         this.trueIdentities.push(this.startingTeam)
-        for (let i = this.trueIdentities.length - 1; i > 0; i--) {
+        this.agentImages = agentImages
+        // Shuffle board
+        for (let i = 25 - 1; i > 0; i--) {
             let j = Math.floor(Math.random() * (i + 1));
-            [this.trueIdentities[i], this.trueIdentities[j]] = [this.trueIdentities[j], this.trueIdentities[i]]
+            [this.trueIdentities[i], this.trueIdentities[j]] = [this.trueIdentities[j], this.trueIdentities[i]];
+            [this.agentImages[i], this.agentImages[j]] = [this.agentImages[j], this.agentImages[i]];
         }
         this.turn = this.startingTeam
     }
 
     getState(user) {
+        let images = Array(25).fill("")
         let identities = this.trueIdentities.map((trueID, i) => {
             if (!user.isSpymaster()) {
-                return trueID * this.revealedIdentities[i] // Mask
+                if (this.revealedIdentities[i]) {
+                    images[i] = this.agentImages[i];
+                }
+                return trueID * this.revealedIdentities[i]; // Mask
             }
-            return trueID
+            images[i] = this.agentImages[i];
+            return trueID;
         })
         return {
             codenames: this.codenames,
             identities: identities,
+            agentImages: images,
             startingTeam: this.startingTeam,
             turn: this.turn
         }
@@ -262,7 +275,9 @@ class User {
         }
         this.socket.join(roomCode)
         console.log(this.uuid, "joined room:", room.code)
-        this.role[this.room.code] = [0, "spectator"]
+        if (!this.role[this.room.code]) {
+            this.role[this.room.code] = [0, "spectator"]
+        }
         callback(RESPONSE_CODE.FOUND, this.isHost(), room.getState(this), this.room.getPlayerList()); 
         this.sendToRoom("playerJoined", this.username, this.room.getPlayerList()) 
     }

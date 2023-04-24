@@ -109,11 +109,8 @@
     height: 100%;
     transition: transform 1.5s;
     transform-style: preserve-3d;
+    border-radius: 10px;
 }
-
-/* .agent-card:hover .agent-card-inner {
-    transform: rotateY(180deg);
-} */
 
 .flip {
     transform: rotateY(180deg); 
@@ -130,10 +127,6 @@
 }
 
 .agent-card-front {
-    /* background-image: url("/images/hello-my-name-is.png");
-    background-size: 100% 100%;     
-    background-repeat: no-repeat;
-    background-position: center center;  */
     background: linear-gradient(0deg, 
         var(--light-gray) 0%, var(--light-gray) 10%, 
         var(--white) 10%, var(--white) 60%, 
@@ -166,9 +159,37 @@
 }
 
 .agent-card-back {
-    background-color: var(--accent2);
+    /* background-color: inherit; */
+    background-color: var(--light-gray);
     transform: rotateY(180deg);
 }
+
+.team1 {
+    background-color: var(--accent1);
+}
+
+.team2 {
+    background-color: var(--accent2);
+}
+
+.assassin {
+    background-color: var(--black);
+}
+
+.agent-card img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* .agent-card:has(img) {
+    background-color: rgba(200,0,0,0.5);
+} */
 
 .name-label1 {
     position: absolute;
