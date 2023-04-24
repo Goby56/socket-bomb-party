@@ -12,6 +12,10 @@ function getFormData(form) {
     return data;
 }
 
+socket.emit("fetchUsername", username => {
+    $("#username-input-field").val(username)
+})
+
 roomNameForm.on("change click keyup input paste", event => {
     // Changes button value to "join room" if room code is provided
     if (getFormData(roomNameForm)["roomcode"] != "") {

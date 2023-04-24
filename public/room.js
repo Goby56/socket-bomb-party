@@ -42,7 +42,6 @@ function updateState(state) {
 }
 
 function revealIdentities(identities) {
-    console.log(identities)
     let cards = $(".agent-card-inner").toArray()
     for (let r = 0; r < 5; r++) {
         for (let c = 0; c < 5; c++) {
@@ -50,14 +49,14 @@ function revealIdentities(identities) {
             let card = $(cards[r*5 + c])
             if (id == 0) return;
             if (id < 0) {
+                console.log("REVEALED IS")
                 // TODO IMPLEMENT REVEALED CARDS
                 if (!card.hasClass("flip")) {
-                    card.toggleClass("flip")
+                    card.addClass("flip")
                 }
             } else if (id > 0) {
                 let cardFront = $(card.children(".agent-card-front"))
-                // cardFront.removeClass("team1 team2 assasin")
-                console.log(id)
+                cardFront.removeClass("team1 team2 assasin")
                 if (id == 1) {
                     cardFront.addClass("team1")
                 } else if (id == 2) {
@@ -65,7 +64,6 @@ function revealIdentities(identities) {
                 } else if (id == 4) {
                     cardFront.addClass("assassin")
                 }
-                // TODO IMPLEMENT SPYMASTER VIEW
             }
         }
     }
@@ -128,6 +126,7 @@ socket.on("playerSentMessage", (sender, message) => {
 })
 socket.on("hostStartedGame", state => {
     $("#log-contents").append(`<p>game started!</p>`)
+    console.log(state)
     revealBoard(state.codenames)
     updateState(state)
 })
@@ -145,8 +144,9 @@ socket.on("playerChangedName", (prevName, newName, playerList) => {
 })
 
 // ----- Team switching -----
-function joinTeam(team, role, gameStarted) {
-    socket.emit("switchTeams", team, role, gameStarted => {
+function joinTeam(team, role) {
+    socket.emit("switchTeams", team, role, (gameStarted, state) => {
+        updateState(state)
         if (gameStarted) {
             $(".join-team-button").toArray().forEach(button => {
                 let btn = $(button)

@@ -4,7 +4,6 @@ function getUuid() {
     if (!document.cookie) {
         document.cookie = uuidv4()
     }
-    console.log(document.cookie)
     return document.cookie;
 }
 

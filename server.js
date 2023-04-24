@@ -53,7 +53,6 @@ class Game {
             }
             return trueID
         })
-        // console.log(user.username, identities)
         return {
             codenames: this.codenames,
             identities: identities,
@@ -106,17 +105,18 @@ class Room {
         return this.players.map(player => {
             return {
                 username: player.username,
-                role: player.role,
+                role: player.role[player.room.code],
                 isHost: player.isHost()
             }
         })
     }
 
     getState(user) {
+        let currRoom = user.room.code
         return {
             gameStarted: this.gameStarted,
-            team: user.role[0],
-            role: user.role[1],
+            team: user.role[currRoom][0],
+            role: user.role[currRoom][1],
             ...this.game.getState(user)
         }
     }
@@ -154,7 +154,8 @@ class User {
 
     constructor(socket) {
         this.uuid = socket.handshake.query.uuid
-        this.role = [0, "spectator"] // [<0-2>, <"spectator"|"operative"|"spymaster"]
+        this.role = {}
+        // this.role = [0, "spectator"] // [<0-2>, <"spectator"|"operative"|"spymaster"]
     }
 
     static register(socket) {
@@ -165,9 +166,17 @@ class User {
         this.users[uuid].bind(socket)
     }
 
+    /**
+     * Provide atleast one of the arguments and a User will be returned
+     * if the given user exists
+     * @param {string} uuid 
+     * @param {socket} socket 
+     * @param {string} socketID 
+     * @returns 
+     */
     static get(uuid = undefined, socket = undefined, socketID = undefined) {
         if (uuid) {
-            return this.user[uuid]
+            return this.users[uuid]
         }
         if (socket) {
             return this.users[socket.handshake.query.uuid]
@@ -178,12 +187,36 @@ class User {
         }
     }
 
-    sendToRoom(event, ...message) {
-        io.to(this.room.code).emit(event, ...message)
+    /**
+     * If the object {includeState: true} is present as additional 
+     * data the message will be sent out indiviually to each user 
+     * with that user's given state
+     * @param {*} event 
+     * @param  {...any} data 
+     */
+    sendToRoom(event, ...data) {
+        let includeState = data.some((param, i) => {
+            if (param.includeState) {
+                data.splice(i)
+                return true
+            }
+        })
+       
+        if (includeState) {
+            this.room.players.forEach(user => {
+                user.send(event, ...data, this.room.getState(user))
+            })
+        } else {
+            io.to(this.room.code).emit(event, ...data)
+        }
+    }
+
+    send(event, ...message) {
+        io.to(this.socket.id).emit(event, ...message)
     }
 
     isSpymaster() {
-        return this.role[1] == "spymaster"
+        return this.role[this.room.code][1] == "spymaster"
     }
 
     isHost() {
@@ -229,9 +262,8 @@ class User {
         }
         this.socket.join(roomCode)
         console.log(this.uuid, "joined room:", room.code)
-        this.switchTeams(0, "spectator")
+        this.role[this.room.code] = [0, "spectator"]
         callback(RESPONSE_CODE.FOUND, this.isHost(), room.getState(this), this.room.getPlayerList()); 
-        // TODO maybe remove sending player list in callback
         this.sendToRoom("playerJoined", this.username, this.room.getPlayerList()) 
     }
 
@@ -263,16 +295,7 @@ class User {
     startGame(callback) {
         callback(RESPONSE_CODE.OK)
         this.room.gameStarted = true
-        // console.log(Object.keys(User.users))
-        io.sockets.adapter.rooms.get(this.room.code).forEach(id => {
-            this.sendToRoom("hostStartedGame", this.room.getState(User.get(socketID=id)))
-            // THIS BROKEY TODO FIX
-        })
-        // for (let uuid of Object.keys(User.users)) {
-        //     // console.log("sending started game to", User.get(uuid).username)
-            
-        //     this.sendToRoom("hostStartedGame", this.room.getState(User.get(uuid)))
-        // }
+        this.sendToRoom("hostStartedGame", {includeState: true})
     }
 
     sendMessage(message) {
@@ -282,18 +305,29 @@ class User {
 
     revealAgent(row, column) {
         if (this.room.game.revealAgent(row, column)) {
-            this.sendToRoom("operativeGuessed", row, column, this.room.getState(this))
+            this.sendToRoom("operativeGuessed", row, column, {includeState: true})
         }
     }
 
     switchTeams(team, role, callback) {
-        if (this.room.gameStarted & this.role[0] != 0) {
-            return;
+        let prevRole = this.role[this.room.code]
+        if (this.room.gameStarted & prevRole[0] != 0) {
+            return; // If game has started and player has already chosen role
         }
-        this.role = [team, role]
+        if (prevRole[0] == team & prevRole[1] == role) {
+            return; // If player did not change role
+        }
+
+        this.role[this.room.code] = [team, role]
         if (team) {
             this.sendToRoom("playerSwitchedTeam", this.room.getPlayerList())
-            callback(this.room.gameStarted)
+            callback(this.room.gameStarted, this.room.getState(this))
+        }
+    }
+
+    fetchUsername(callback) {
+        if (this.username) {
+            callback(this.username)
         }
     }
 }
@@ -301,14 +335,11 @@ class User {
 io.on('connection', (socket) => {
     let uuid = socket.handshake.query.uuid
     User.register(socket)
-    // TODO socket recognition to save previous name
 
     socket.on('disconnecting', () => {
         if (socket.rooms.size > 1) {
             User.get(uuid).leaveRoom()
         }
-        // io.to(socket.rooms)
-        // User.get(uuid).leaveRoom()
     });
 });
 
