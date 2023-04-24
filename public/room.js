@@ -56,7 +56,8 @@ function revealIdentities(identities) {
                 }
             } else if (id > 0) {
                 let cardFront = $(card.children(".agent-card-front"))
-                cardFront.removeClass("team1 team2 assasin")
+                // cardFront.removeClass("team1 team2 assasin")
+                console.log(id)
                 if (id == 1) {
                     cardFront.addClass("team1")
                 } else if (id == 2) {
@@ -96,7 +97,6 @@ function revealBoard(codenames) {
 }
 
 socket.emit("joinRoom", window.location.pathname.slice(-4), (responseCode, isHost, state, playerList) => {
-    console.log(responseCode)
     if (responseCode != 302) {
         window.location = "/"
         alert("An error occured joining the room")

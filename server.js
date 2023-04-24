@@ -53,7 +53,7 @@ class Game {
             }
             return trueID
         })
-        console.log(user.username, identities)
+        // console.log(user.username, identities)
         return {
             codenames: this.codenames,
             identities: identities,
@@ -165,8 +165,17 @@ class User {
         this.users[uuid].bind(socket)
     }
 
-    static get(uuid) {
-        return this.users[uuid]
+    static get(uuid = undefined, socket = undefined, socketID = undefined) {
+        if (uuid) {
+            return this.user[uuid]
+        }
+        if (socket) {
+            return this.users[socket.handshake.query.uuid]
+        }
+        if (socketID) {
+            let socket = io.sockets.sockets.get(socketID)
+            return this.users[socket.handshake.query.uuid]
+        }
     }
 
     sendToRoom(event, ...message) {
@@ -254,9 +263,16 @@ class User {
     startGame(callback) {
         callback(RESPONSE_CODE.OK)
         this.room.gameStarted = true
-        for (let uuid of Object.keys(User.users)) {
-            this.sendToRoom("hostStartedGame", this.room.getState(User.get(uuid)))
-        }
+        // console.log(Object.keys(User.users))
+        io.sockets.adapter.rooms.get(this.room.code).forEach(id => {
+            this.sendToRoom("hostStartedGame", this.room.getState(User.get(socketID=id)))
+            // THIS BROKEY TODO FIX
+        })
+        // for (let uuid of Object.keys(User.users)) {
+        //     // console.log("sending started game to", User.get(uuid).username)
+            
+        //     this.sendToRoom("hostStartedGame", this.room.getState(User.get(uuid)))
+        // }
     }
 
     sendMessage(message) {

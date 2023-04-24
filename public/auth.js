@@ -1,12 +1,11 @@
 import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
 
 function getUuid() {
-    let uuid = window.localStorage.getItem("uuid")
-    if (!uuid) {
-        uuid = uuidv4()
-        window.localStorage.setItem("uuid", uuid)
+    if (!document.cookie) {
+        document.cookie = uuidv4()
     }
-    return uuid;
+    console.log(document.cookie)
+    return document.cookie;
 }
 
 function connectSocket() {
