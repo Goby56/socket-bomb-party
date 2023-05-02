@@ -172,6 +172,9 @@ $("#join-team1-spymaster").on("click", e => { joinTeam(1, "spymaster") })
 $("#join-team2-operative").on("click", e => { joinTeam(2, "operative") })
 $("#join-team2-spymaster").on("click", e => { joinTeam(2, "spymaster") })
 
+$("#randomize-teams").on("click", e => socket.emit("randomizeTeams"))
+$("#reset-teams").on("click", e => socket.emit("resetTeams"))
+
 socket.on("playerSwitchedTeam", playerList => {
     updateTeams(playerList)
 })

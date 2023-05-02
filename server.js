@@ -95,6 +95,7 @@ class Room {
         this.code = roomCode
         this.host = hostUser
         this.gameStarted = false
+        this.roles = [[1, "operative"], [1, "spymaster"], [2, "operative"], [2, "spymaster"]]
         this.teams = [
             [],
             { spymasters: [], operatives: [] },
@@ -214,7 +215,6 @@ class User {
                 return true
             }
         })
-       
         if (includeState) {
             this.room.players.forEach(user => {
                 user.send(event, ...data, this.room.getState(user))
@@ -305,6 +305,7 @@ class User {
         this.room?.remove(this)
         this.socket.leave(this.room.code)
         this.sendToRoom("playerLeft", this.username, this.room.getPlayerList())
+        // TODO leave host role over to next user in room.players list
     }
 
     startGame(callback) {
@@ -332,7 +333,6 @@ class User {
         if (prevRole[0] == team & prevRole[1] == role) {
             return; // If player did not change role
         }
-
         this.role[this.room.code] = [team, role]
         if (team) {
             this.sendToRoom("playerSwitchedTeam", this.room.getPlayerList())
@@ -344,6 +344,36 @@ class User {
         if (this.username) {
             callback(this.username)
         }
+    }
+
+    randomizeTeams() {
+        if (!this.isHost) {
+            return;
+        }
+        // Shuffle player list
+        for (let i = this.room.players.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            // Need to retain player join order to pass on host when he leaves
+            // Maybe add another list of shuffled indices
+            [this.room.players[i], this.room.players[j]] = [this.room.players[j], this.room.players[i]];
+        }
+        // Distribute roles
+        this.room.players.forEach((player, i) => {
+            let roomCode = player.room.code;
+            player.role[roomCode] = this.room.roles[i%4]
+        })
+        this.sendToRoom("playerSwitchedTeam", this.room.getPlayerList())
+    }
+
+    resetTeams() {
+        if (!this.isHost) {
+            return;
+        }
+        this.room.players.forEach(player => {
+            let roomCode = player.room.code;
+            player.role[roomCode] = [0, "spectator"]
+        })
+        this.sendToRoom("playerSwitchedTeam", this.room.getPlayerList())
     }
 }
 
