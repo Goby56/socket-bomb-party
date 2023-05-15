@@ -6,8 +6,8 @@
     --black2: rgb(40, 40, 37);
     --dark-gray: rgb(81, 79, 70);
     --light-gray: #878472ff;
-    --accent1: #ad343eff;
-    --accent2: #06aed5ff;
+    --accent1: #06aed5ff;
+    --accent2: #ad343eff;
     --white: #fffbfaff;
     font-family: "Pathway Extreme";
 }
@@ -20,7 +20,6 @@ body {
     height: 100vh;
     /* overflow: hidden; */
     background: var(--black2);
-    /* background-image: url("images/black-water.webp"); */
 }
 
 p {
@@ -34,6 +33,14 @@ h1 {
 
 h2 {
     font-size: 3rem;
+    color: var(--white);
+}
+
+h3 {
+    font-size: 1.5rem;
+    margin: 0;
+    text-align: center;
+    color: var(--white);
 }
 
 a {
@@ -62,6 +69,15 @@ a {
 
 .accent2 {
     color: var(--accent2);
+}
+
+.frame {
+    background: rgba(255, 255, 255, 0.09);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(11.1px);
+    -webkit-backdrop-filter: blur(11.1px);
+    border: 1px solid rgba(255, 255, 255, 0.31);
 }
 
 .popup {

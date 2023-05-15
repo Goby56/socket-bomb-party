@@ -43,9 +43,11 @@
     grid-template-columns: 1fr 3fr 1fr;
     grid-template-rows: 1fr repeat(2, 2fr) 1fr;
     grid-column-gap: 0px;
-    grid-row-gap: 0px;
+    grid-row-gap: 1vh;
     width: 100%;
     height: 100%;
+    padding: 1vw 1vw 1vw 1vw;
+    box-sizing: border-box;
 }
 
 #game-board {
@@ -59,6 +61,10 @@
 
 #host-settings {
     grid-area: 1 / 1 / 26 / 26;
+    width: fit-content;
+    place-self: center;
+    width: 60%;
+    height: 50%;
 }
 
 #team1-container {
@@ -75,6 +81,10 @@
 
 #input-field {
     grid-area: 4 / 2 / 5 / 3;
+    height: 80%;
+    width: 80%;
+    place-self: center;
+    bottom: 0;
 }
 
 #top-left-container {
@@ -87,10 +97,84 @@
 
 #bottom-left-container {
     grid-area: 4 / 1 / 5 / 2;
+    gap: 1vw;
 }
 
 #bottom-right-container {
     grid-area: 4 / 3 / 5 / 4;
+}
+
+#game-log {
+    height: 50%;
+    margin: 1vw 1vw 1vw 1vw;
+    border-radius: 1vw 1vw 0vw 0vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--black2);
+}
+
+#log-contents {
+    overflow-y: auto;
+    padding-left: 1vw;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+#log-input {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+#log-input-field {
+    width: 100%;
+    z-index: 2;
+}
+
+.team-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 20% repeat(2, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+}
+
+#team1-name, #team2-name {
+    grid-area: 1 / 1 / 2 / 2;
+}
+#team1-name {
+    color: var(--accent1);
+}
+#team2-name {
+    color: var(--accent2);
+}
+
+.team-join-container {
+    gap: 1vw;
+}
+
+.team-list {
+    gap: 1vw;
+}
+
+.operative-container {
+    grid-area: 2 / 1 / 3 / 2;
+}
+
+.spymaster-container {
+    grid-area: 3 / 1 / 4 / 2;
+}
+
+#copy-room-code {
+    width: 3rem;
+    color: white;
+    transition: 0.3s;
+}
+
+#copy-room-code:hover {
+    transform: scale(0.95);
 }
 
 .agent-card {

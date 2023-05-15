@@ -6,70 +6,74 @@
         <a href="/"><h2><i class="accent1">CODE</i> <i class="accent2">NAMES</i></h2></a>
     </section>
     <section id="game-board" class="center">
-        <div id="host-settings" class="hide center vertical">
+        <div id="host-settings" class="hide center vertical frame">
             <div id="team-settings" class="center vertical">
-                <h2>Team settings</h2>
+                <h3>Team settings</h3>
                 <button id="randomize-teams" class="small">randomize</button>
                 <button id="reset-teams" class="small">reset</button>
             </div>
             <div id="game-settings" class="center vertical">
-                <h2>Game settings</h2>
+                <h3>Game settings</h3>
                 <input type="text" placeholder="language">
             </div> 
             <button id="start-game">start game</button>
         </div>
     </section>
     <section id="top-right-container"></section>
-    <section id="team1-container">
-        <div class="role-container">
-            <div class="center">
+    <section id="team1-container" class="frame team-container">
+        <h3 id="team1-name">Team 1</h3>
+        <div class="role-container operative-container">
+            <div class="center team-join-container">
                 <p>Operative(s)</p>
                 <button id="join-team1-operative" class="join-team-button">join</button>
             </div>
-            <div id="team1-operative" class="center"></div>
+            <div id="team1-operative" class="center team-list"></div>
         </div>
-        <div class="role-container">
-            <div class="center">
+        <div class="role-container spymaster-container">
+            <div class="center team-join-container">
                 <p>Spymaster(s)</p>
                 <button id="join-team1-spymaster" class="join-team-button">join</button>
             </div>
-            <div id="team1-spymaster" class="center"></div>
+            <div id="team1-spymaster" class="center team-list"></div>
         </div>
     </section>
-    <section id="team2-container">
-        <div class="role-container">
-            <div class="center">
+    <section id="team2-container" class="frame team-container">
+        <h3 id="team2-name">Team 2</h3>
+        <div class="role-container operative-container">
+            <div class="center team-join-container">
                 <p>Operative(s)</p>
                 <button id="join-team2-operative" class="join-team-button">join</button>
             </div>
-            <div id="team2-operative" class="center"></div>
+            <div id="team2-operative" class="center team-list"></div>
         </div>
-        <div class="role-container">
-            <div class="center">
+        <div class="role-container spymaster-container">
+            <div class="center team-join-container">
                 <p>Spymaster(s)</p>
                 <button id="join-team2-spymaster" class="join-team-button">join</button>
             </div>
-            <div id="team2-spymaster" class="center"></div>
+            <div id="team2-spymaster" class="center team-list"></div>
         </div>
     </section>
-    <section id="game-info">
+    <section id="game-info" class="frame">
         <div id="game-log">
             <ul id="log-contents"></ul>
             <form id="log-input" class="center">
                 <input type="text" id="log-input-field" placeholder="say something">
             </form>
         </div>
-        <div id="spectators"></div>
+        <h3>Spectators</h3>
+        <div id="spectators" class="center"></div>
     </section>
     <section id="bottom-left-container" class="center">
         <h2>{{ roomCode }}</h2>
+        <img src="/images/copy.png" id="copy-room-code" alt="">
     </section>
     <section id="bottom-right-container" class="center">
         <form action="/">
             <button id="leave-game">leave game</button>
         </form>
     </section>
-    <section id="input-field" class="center">
+    <section id="input-field" class="center frame">
     </section>
 </div>
 {% endblock body %}
