@@ -41,7 +41,7 @@ class Game {
         // 4: assassin, 3: npc, 1: team 1, 2: team 2, negative values are revealed cards
         this.trueIdentities = [1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4]
         this.revealedIdentities = new Array(25).fill(0)
-        this.startingTeam = crypto.randomInt(2) + 1
+        startingTeam = crypto.randomInt(2) + 1
         this.trueIdentities.push(this.startingTeam)
         this.agentImages = agentImages
         // Shuffle board
@@ -50,26 +50,27 @@ class Game {
             [this.trueIdentities[i], this.trueIdentities[j]] = [this.trueIdentities[j], this.trueIdentities[i]];
             [this.agentImages[i], this.agentImages[j]] = [this.agentImages[j], this.agentImages[i]];
         }
-        this.turn = this.startingTeam
+        this.turn = [startingTeam, "spymaster"]
+        this.currentClue = ["", 0] // <clue> and <wordCount>
+        this.guessesLeft = 0
     }
 
-    getState(user) {
+    getState(user, gameStarted) {
         let images = Array(25).fill("")
         let identities = this.trueIdentities.map((trueID, i) => {
-            if (!user.isSpymaster()) {
-                if (this.revealedIdentities[i]) {
-                    images[i] = this.agentImages[i];
-                }
-                return trueID * this.revealedIdentities[i]; // Mask
+            if (user.isSpymaster() && gameStarted) {
+                images[i] = this.agentImages[i];
+                return trueID;
             }
-            images[i] = this.agentImages[i];
-            return trueID;
+            if (this.revealedIdentities[i]) {
+                images[i] = this.agentImages[i];
+            }
+            return trueID * this.revealedIdentities[i]; // Mask
         })
         return {
             codenames: this.codenames,
             identities: identities,
             agentImages: images,
-            startingTeam: this.startingTeam,
             turn: this.turn
         }
         
@@ -80,8 +81,18 @@ class Game {
             return false;
         }
         this.revealedIdentities[row*5 + column] += 1
-        this.trueIdentities[row*5 + column] *= -1 
+        this.trueIdentities[row*5 + column] *= -1
+        this.guessesLeft--
+        if (this.guessesLeft < 1) {
+            this.turn = [1+(this.turn[0]++)%2, "spymaster"]
+        }
         return true;
+    }
+
+    giveClue(clue, wordCount) {
+        this.currentClue = [clue, wordCount]
+        this.guessesLeft = wordCount + 1
+        this.turn[1] = "operative"
     }
 }
 
@@ -131,7 +142,7 @@ class Room {
             gameStarted: this.gameStarted,
             team: user.role[currRoom][0],
             role: user.role[currRoom][1],
-            ...this.game.getState(user)
+            ...this.game.getState(user, this.gameStarted)
         }
     }
 
@@ -312,6 +323,7 @@ class User {
         callback(RESPONSE_CODE.OK)
         this.room.gameStarted = true
         this.sendToRoom("hostStartedGame", {includeState: true})
+        // Only start game if enough players in each team and role
     }
 
     sendMessage(message) {

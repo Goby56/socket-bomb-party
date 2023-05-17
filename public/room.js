@@ -3,11 +3,12 @@ import { connectSocket } from "./auth.js"
 let socket = connectSocket()
 
 function updateTeams(playerList) {
-    [
+    let teamSelectors = [
         "#team1-operative", "#team1-spymaster",
         "#team2-operative", "#team2-spymaster",
         "#spectators"
-    ].forEach(selector => {
+    ]
+    teamSelectors.forEach(selector => {
         $(selector).empty()
     })
     playerList.forEach(player => {
@@ -18,6 +19,7 @@ function updateTeams(playerList) {
         } else {
             selector = `#team${player.role[0]}-${player.role[1]}`
         }
+        teamSelectors.splice(teamSelectors.indexOf(selector), 1)
         if (player.isHost) {
             element = `<p><img class="host-badge" src="/images/host.png">${player.username}</p>`
         } else {
@@ -25,11 +27,21 @@ function updateTeams(playerList) {
         }
         $(selector).append(element)
     })
+    if (teamSelectors.length == 0 || 
+        (teamSelectors.length == 1 && teamSelectors[0] == "#spectators")) {
+            $("#status-indicator").text("Waiting for host to start . . .")
+    } else if (playerList.length >= 4) {
+        $("#status-indicator").text("Both teams need atleast two players . . . ")
+    }
+
+    console.log(playerList)
 }
 
 function updateState(state) {
     console.log(state)
     if (state.gameStarted) {
+        let roleName = state.turn[1].replace(state.turn[1][0], state.turn[1][0].toUpperCase()) + "s"
+        $("#status-indicator").text(`Team ${state.turn[0]}\n${roleName}!`)
         revealIdentities(state.identities, state.agentImages)
         if (state.team) {
             $(".join-team-button").toArray().forEach(button => {
