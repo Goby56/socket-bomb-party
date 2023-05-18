@@ -34,22 +34,31 @@ function updateTeams(playerList) {
         $("#status-indicator").text("Both teams need atleast two players . . . ")
     }
 
-    console.log(playerList)
+    // console.log(playerList)
 }
 
 function updateState(state) {
-    console.log(state)
+    // console.log(state)
     if (state.gameStarted) {
         let roleName = state.turn[1].replace(state.turn[1][0], state.turn[1][0].toUpperCase()) + "s"
         $("#status-indicator").text(`Team ${state.turn[0]}\n${roleName}!`)
         revealIdentities(state.identities, state.agentImages)
         if (state.team) {
+            // If player has a team, hide button to join other teams when game is started
             $(".join-team-button").toArray().forEach(button => {
                 let btn = $(button)
                 if (!btn.hasClass("hide")) {
                     btn.toggleClass("hide")
                 }
             })
+        }
+        if (state.role == "spymaster" && state.turn[1] == "spymaster" && 
+            state.team == state.turn[0]) {
+            $("#spymaster-clue-container").removeClass("hide")
+        } else {
+            if (!$("#spymaster-clue-container").hasClass("hide")) {
+                $("#spymaster-clue-container").addClass("hide")
+            }
         }
     }
 }
@@ -114,6 +123,10 @@ function revealBoard(codenames) {
         let gridArea = $(e.currentTarget).css("grid-area").split("/")
         socket.emit("revealAgent", gridArea[0]-1, gridArea[1]-1)
     })
+}
+
+function getCodename(row, column) {
+    return $($(".agent-card-inner").toArray()[row*5 + column]).find(".agent-codename").text()
 }
 
 socket.emit("joinRoom", window.location.pathname.slice(-4), (responseCode, isHost, state, playerList) => {
@@ -191,8 +204,19 @@ socket.on("playerSwitchedTeam", playerList => {
     updateTeams(playerList)
 })
 
-// ----- Guessing -----
+// ----- Gameplay -----
+$("#give-clue-button").on("click", e => {
+    let clue = $("#clue-input-field").val()
+    let referenceCount = $("#referenceCount-selection").val()
+    socket.emit("giveClue", clue, referenceCount)
+})
+
 socket.on("operativeGuessed", (row, column, state) => {
-    $($(".agent-card-inner").toArray()[row*5 + column]).toggleClass("flip")
+    $("#log-contents").append(`<p>${state.username} guesses ${getCodename(row, column)}</p>`)
+    updateState(state)
+})
+
+socket.on("spymasterGaveClue", (clue, referenceCount, state) => {
+    $("#log-contents").append(`<p>${state.username} gave the clue ${clue} ${referenceCount}</p>`)
     updateState(state)
 })

@@ -41,8 +41,8 @@ class Game {
         // 4: assassin, 3: npc, 1: team 1, 2: team 2, negative values are revealed cards
         this.trueIdentities = [1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4]
         this.revealedIdentities = new Array(25).fill(0)
-        startingTeam = crypto.randomInt(2) + 1
-        this.trueIdentities.push(this.startingTeam)
+        let startingTeam = crypto.randomInt(2) + 1
+        this.trueIdentities.push(startingTeam)
         this.agentImages = agentImages
         // Shuffle board
         for (let i = 25 - 1; i > 0; i--) {
@@ -51,7 +51,7 @@ class Game {
             [this.agentImages[i], this.agentImages[j]] = [this.agentImages[j], this.agentImages[i]];
         }
         this.turn = [startingTeam, "spymaster"]
-        this.currentClue = ["", 0] // <clue> and <wordCount>
+        this.currentClue = ["", 0] // <clue> and <referenceCount>
         this.guessesLeft = 0
     }
 
@@ -71,28 +71,54 @@ class Game {
             codenames: this.codenames,
             identities: identities,
             agentImages: images,
-            turn: this.turn
+            turn: this.turn,
+            cluu: this.currentClue
         }
         
     }
 
-    revealAgent(row, column) {
+    revealAgent(user, row, column, gameStarted) {
+        if (!gameStarted) {
+            return false;
+        }
+        if (!user.inTeamWithRole(...this.turn)) {
+            return false;
+        }
+        if (user.isSpymaster()) {
+            return false;
+        }
         if (this.revealedIdentities[row*5 + column]) {
             return false;
         }
+        if (this.trueIdentities[row*5 + column] != user.getTeam()) {
+            // TODO implement score counting and victory conditions
+            // when player selects a agent
+            this.guessesLeft = 0
+        } else {
+            this.guessesLeft--
+        }
         this.revealedIdentities[row*5 + column] += 1
         this.trueIdentities[row*5 + column] *= -1
-        this.guessesLeft--
         if (this.guessesLeft < 1) {
             this.turn = [1+(this.turn[0]++)%2, "spymaster"]
         }
         return true;
     }
 
-    giveClue(clue, wordCount) {
-        this.currentClue = [clue, wordCount]
-        this.guessesLeft = wordCount + 1
+    giveClue(user, clue, referenceCount, gameStarted) {
+        if (!gameStarted) {
+            return false;
+        }
+        if (!user.inTeamWithRole(...this.turn)) {
+            return false;
+        }
+        if (!user.isSpymaster()) {
+            return false;
+        }
+        this.currentClue = [clue, referenceCount]
+        this.guessesLeft = referenceCount + 1
         this.turn[1] = "operative"
+        return true;
     }
 }
 
@@ -107,11 +133,11 @@ class Room {
         this.host = hostUser
         this.gameStarted = false
         this.roles = [[1, "operative"], [1, "spymaster"], [2, "operative"], [2, "spymaster"]]
-        this.teams = [
-            [],
-            { spymasters: [], operatives: [] },
-            { spymasters: [], operatives: [] }
-        ]
+        // this.teams = [
+        //     [],
+        //     { spymasters: [], operatives: [] },
+        //     { spymasters: [], operatives: [] }
+        // ]
         this.game = new Game()
     }
 
@@ -142,6 +168,7 @@ class Room {
             gameStarted: this.gameStarted,
             team: user.role[currRoom][0],
             role: user.role[currRoom][1],
+            username: user.username,
             ...this.game.getState(user, this.gameStarted)
         }
     }
@@ -247,6 +274,15 @@ class User {
         return this == this.room.host
     }
 
+    inTeamWithRole(team, role) {
+        return (this.role[this.room.code][0] == team && 
+                this.role[this.room.code][1] == role)
+    }
+
+    getTeam() {
+        return this.role[this.room.code][0]
+    }
+
     bind(socket) {
         socket.onAny((event, ...args) => {
             try {
@@ -331,12 +367,6 @@ class User {
         this.sendToRoom("playerSentMessage", this.username, message)
     }
 
-    revealAgent(row, column) {
-        if (this.room.game.revealAgent(row, column)) {
-            this.sendToRoom("operativeGuessed", row, column, {includeState: true})
-        }
-    }
-
     switchTeams(team, role, callback) {
         let prevRole = this.role[this.room.code]
         if (this.room.gameStarted & prevRole[0] != 0) {
@@ -386,6 +416,18 @@ class User {
             player.role[roomCode] = [0, "spectator"]
         })
         this.sendToRoom("playerSwitchedTeam", this.room.getPlayerList())
+    }
+
+    revealAgent(row, column) {
+        if (this.room.game.revealAgent(this, row, column, this.room.gameStarted)) {
+            this.sendToRoom("operativeGuessed", row, column, {includeState: true})
+        }
+    }
+
+    giveClue(clue, referenceCount) {
+        if (this.room.game.giveClue(this, clue, Number(referenceCount), this.room.gameStarted)) {
+            this.sendToRoom("spymasterGaveClue", clue, referenceCount, {includeState: true})
+        }
     }
 }
 
