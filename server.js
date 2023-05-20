@@ -34,7 +34,11 @@ const RESPONSE_CODE = {
     FULL: 413,
 }
 
-const PORT = 3000;
+const PORT = process.env.PORT;
+if (PORT == null || PORT == "") {
+  PORT = 3000;
+}
+
 
 function getCodenames(lang) {
     let indices = [...Array(words[lang].length).keys()]
@@ -63,7 +67,7 @@ class Game {
             [this.agentImages[i], this.agentImages[j]] = [this.agentImages[j], this.agentImages[i]];
         }
         this.turn = [startingTeam, "spymaster"]
-        this.currentClue = ["", 0] // <clue> and <referenceCount>
+        this.currentClue = ["", 0] // <clue> & <referenceCount>
         this.guessesLeft = 0
         this.agentsLeft = [8, 8]
         this.agentsLeft[startingTeam - 1] += 1
