@@ -151,6 +151,25 @@
     color: var(--accent2);
 }
 
+#team1-agents-left {
+    color: var(--accent1);
+}
+#team2-agents-left {
+    color: var(--accent2);
+    
+}
+.agents-left-counter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    font-size: 20vh;
+    font-weight: 900;
+    text-align: center;
+    z-index: -1;
+}
+
 .team-join-container {
     gap: 1vw;
 }
@@ -295,6 +314,8 @@
     position: absolute;
     top: 65%;
     left: 50%;
+    font-size: 1.7rem;
+    font-weight: 800;
     transform: translate(-50%, -50%);
     color: var(--black);
 }

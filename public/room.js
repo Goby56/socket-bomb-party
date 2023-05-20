@@ -38,10 +38,14 @@ function updateTeams(playerList) {
 }
 
 function updateState(state) {
-    // console.log(state)
+    console.log(state)
     if (state.gameStarted) {
         let roleName = state.turn[1].replace(state.turn[1][0], state.turn[1][0].toUpperCase()) + "s"
-        $("#status-indicator").text(`Team ${state.turn[0]}\n${roleName}!`)
+        if (!state.gameOver) {
+            $("#status-indicator").text(`Team ${state.turn[0]}\n${roleName}!`)
+        } else {
+            $("#status-indicator").text(`Team ${state.winner}\nwinner!`)
+        }
         revealIdentities(state.identities, state.agentImages)
         if (state.team) {
             // If player has a team, hide button to join other teams when game is started
@@ -52,14 +56,42 @@ function updateState(state) {
                 }
             })
         }
+        // if (state.team == state.turn[0]) {
+        //     if (state.role == "spymaster" && state.turn[1] == "spymaster") {
+        //         $("#spymaster-clue-container").removeClass("hide")
+        //     } 
+        // }
+        if (state.turn[1] == "spymaster") {
+            if (!$("#general-clue-view").hasClass("hide")) {
+                $("#general-clue-view").addClass("hide")
+            }
+            if (state.role == "spymaster" && state.team == state.turn[0]) {
+                $("#clue-giving-view").removeClass("hide")
+            } else {
+                if (!$("#clue-giving-view").hasClass("hide")) {
+                    $("#clue-giving-view").addClass("hide")
+                }
+            }
+        } else {
+            $("#general-clue-view").removeClass("hide")
+            $("#clue-text").text(state.clue[0])
+            $("#referenceCount-text").text(state.clue[1])
+            if (!$("#clue-giving-view").hasClass("hide")) {
+                $("#clue-giving-view").addClass("hide")
+            }
+            if (state.role == "operative" && state.team == state.turn[0]) {
+                $("#end-guessing-button").removeClass("hide")
+            }
+        }
         if (state.role == "spymaster" && state.turn[1] == "spymaster" && 
             state.team == state.turn[0]) {
-            $("#spymaster-clue-container").removeClass("hide")
         } else {
             if (!$("#spymaster-clue-container").hasClass("hide")) {
                 $("#spymaster-clue-container").addClass("hide")
             }
         }
+        $("#team1-agents-left").text(state.agentsLeft[0])
+        $("#team2-agents-left").text(state.agentsLeft[1])
     }
 }
 
@@ -211,12 +243,30 @@ $("#give-clue-button").on("click", e => {
     socket.emit("giveClue", clue, referenceCount)
 })
 
+$("#end-guessing-button").on("click", e => {
+    socket.emit("endGuessing")
+})
+
 socket.on("operativeGuessed", (row, column, state) => {
     $("#log-contents").append(`<p>${state.username} guesses ${getCodename(row, column)}</p>`)
     updateState(state)
 })
 
+socket.on("operativeEndedGuessing", (username, state) => {
+    $("#log-contents").append(`<p>${username} ended guessing</p>`)
+    updateState(state)
+})
+
+socket.on("guessingLimitReached", state => {
+    // TODO TEAM BASED COLORS ON LOG ENTRIES
+    $("#log-contents").append(`<p>No more guesses left</p>`)
+})
+
 socket.on("spymasterGaveClue", (clue, referenceCount, state) => {
     $("#log-contents").append(`<p>${state.username} gave the clue ${clue} ${referenceCount}</p>`)
     updateState(state)
+})
+
+socket.on("gameOver", (winner, state) => {
+    $("#log-contents").append(`<p>Team ${winner} won!</p>`)
 })

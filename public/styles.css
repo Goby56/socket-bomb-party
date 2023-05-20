@@ -58,6 +58,10 @@ a {
     align-items: center;
 }
 
+.gap {
+    gap: 1vw;
+}
+
 .vertical {
     display: flex;
     flex-direction: column;

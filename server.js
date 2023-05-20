@@ -23,6 +23,7 @@ const crypto = require("crypto") // Used to generate random room codes
 const fs = require('fs');
 
 let agentImages = fs.readdirSync("public/images/agents");
+let words = JSON.parse(fs.readFileSync("public/words.json"))
 
 const RESPONSE_CODE = {
     OK: 200,
@@ -35,15 +36,26 @@ const RESPONSE_CODE = {
 
 const PORT = 3000;
 
+function getCodenames(lang) {
+    let indices = [...Array(words[lang].length).keys()]
+    for (let i = indices.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    return indices.slice(0, 25).map(i => {
+        return words[lang][i];
+    })
+}
+
 class Game {
     constructor() {
-        this.codenames = [...Array(25).keys()]
+        this.codenames = getCodenames("se")
         // 4: assassin, 3: npc, 1: team 1, 2: team 2, negative values are revealed cards
         this.trueIdentities = [1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4]
         this.revealedIdentities = new Array(25).fill(0)
         let startingTeam = crypto.randomInt(2) + 1
         this.trueIdentities.push(startingTeam)
-        this.agentImages = agentImages
+        this.agentImages = agentImages.slice()
         // Shuffle board
         for (let i = 25 - 1; i > 0; i--) {
             let j = Math.floor(Math.random() * (i + 1));
@@ -53,12 +65,16 @@ class Game {
         this.turn = [startingTeam, "spymaster"]
         this.currentClue = ["", 0] // <clue> and <referenceCount>
         this.guessesLeft = 0
+        this.agentsLeft = [8, 8]
+        this.agentsLeft[startingTeam - 1] += 1
+        this.gameOver = false
+        this.winner = undefined
     }
 
     getState(user, gameStarted) {
         let images = Array(25).fill("")
         let identities = this.trueIdentities.map((trueID, i) => {
-            if (user.isSpymaster() && gameStarted) {
+            if ((user.isSpymaster() && gameStarted) || this.gameOver) {
                 images[i] = this.agentImages[i];
                 return trueID;
             }
@@ -72,13 +88,40 @@ class Game {
             identities: identities,
             agentImages: images,
             turn: this.turn,
-            cluu: this.currentClue
+            clue: this.currentClue,
+            agentsLeft: this.agentsLeft,
+            gameOver: this.gameOver,
+            winner: this.winner
         }
-        
+    }
+
+    otherTeam(team) {
+        return 1+team%2
+    }
+
+    triggerGameOver(user, winner=true) {
+        this.gameOver = true
+        if (winner) {
+            this.winner = user.getTeam()
+        } else {
+            this.winner = this.otherTeam(user.getTeam())
+        }
+        user.sendToRoom("gameOver", this.winner, {includeState: true})
+    }
+
+    endGuessing(user) {
+        if (user.isSpymaster()) {
+            return false;
+        }
+        if (!user.inTeamWithRole(...this.turn)) {
+            return false;
+        }
+        this.turn = [1+this.turn[0]%2, "spymaster"]
+        return true;
     }
 
     revealAgent(user, row, column, gameStarted) {
-        if (!gameStarted) {
+        if (!gameStarted || this.gameOver) {
             return false;
         }
         if (!user.inTeamWithRole(...this.turn)) {
@@ -89,24 +132,41 @@ class Game {
         }
         if (this.revealedIdentities[row*5 + column]) {
             return false;
+        }  
+
+        let ownTeam = user.getTeam()
+        let oppTeam = this.otherTeam(user.getTeam())
+        switch (this.trueIdentities[row*5 + column]) {
+            case ownTeam:
+                this.agentsLeft[ownTeam - 1] -= 1
+                this.guessesLeft--
+                break;
+            case 3: // npc
+                this.guessesLeft = 0
+                break;
+            case 4: // assassin
+                this.triggerGameOver(user, false)
+                break;
+            default: // other team
+                this.agentsLeft[oppTeam - 1] -= 1
+                this.guessesLeft = 0
         }
-        if (this.trueIdentities[row*5 + column] != user.getTeam()) {
-            // TODO implement score counting and victory conditions
-            // when player selects a agent
-            this.guessesLeft = 0
-        } else {
-            this.guessesLeft--
+        for (let t = 0; t<2; t++) {
+            if (this.agentsLeft[t] == 0) {
+                this.triggerGameOver(user, user.getTeam() == t+1)
+            }
         }
+
         this.revealedIdentities[row*5 + column] += 1
         this.trueIdentities[row*5 + column] *= -1
         if (this.guessesLeft < 1) {
-            this.turn = [1+(this.turn[0]++)%2, "spymaster"]
+            this.turn = [1+this.turn[0]%2, "spymaster"]
         }
         return true;
     }
 
     giveClue(user, clue, referenceCount, gameStarted) {
-        if (!gameStarted) {
+        if (!gameStarted || this.gameOver) {
             return false;
         }
         if (!user.inTeamWithRole(...this.turn)) {
@@ -133,11 +193,6 @@ class Room {
         this.host = hostUser
         this.gameStarted = false
         this.roles = [[1, "operative"], [1, "spymaster"], [2, "operative"], [2, "spymaster"]]
-        // this.teams = [
-        //     [],
-        //     { spymasters: [], operatives: [] },
-        //     { spymasters: [], operatives: [] }
-        // ]
         this.game = new Game()
     }
 
@@ -421,12 +476,21 @@ class User {
     revealAgent(row, column) {
         if (this.room.game.revealAgent(this, row, column, this.room.gameStarted)) {
             this.sendToRoom("operativeGuessed", row, column, {includeState: true})
+            if (this.room.game.guessesLeft < 1) {
+                this.sendToRoom("guessingLimitReached", {includeState: true})
+            }
         }
     }
 
     giveClue(clue, referenceCount) {
         if (this.room.game.giveClue(this, clue, Number(referenceCount), this.room.gameStarted)) {
             this.sendToRoom("spymasterGaveClue", clue, referenceCount, {includeState: true})
+        }
+    }
+
+    endGuessing() {
+        if (this.room.game.endGuessing(this)) {
+            this.sendToRoom("operativeEndedGuessing", this.username, {includeState: true})
         }
     }
 }
