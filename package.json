@@ -1,5 +1,5 @@
 {
-  "name": "socket-bomb-party",
+  "name": "socket-codenames",
   "version": "1.0.0",
   "description": "Javascript school project with socket.io",
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Goby56/socket-bomb-party.git"
+    "url": "git+https://github.com/Goby56/socket-codenames.git"
   },
   "keywords": [
     "javscript",
@@ -22,9 +22,9 @@
   "author": "Goby56",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Goby56/socket-bomb-party/issues"
+    "url": "https://github.com/Goby56/socket-codenames/issues"
   },
-  "homepage": "https://github.com/Goby56/socket-bomb-party#readme",
+  "homepage": "https://github.com/Goby56/socket-codenames#readme",
   "dependencies": {
     "express": "^4.18.1",
     "nodemon": "^2.0.20",
