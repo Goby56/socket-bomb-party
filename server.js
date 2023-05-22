@@ -34,11 +34,7 @@ const RESPONSE_CODE = {
     FULL: 413,
 }
 
-let PORT = process.env.PORT;
-if (PORT == null || PORT == "") {
-  PORT = 3000;
-}
-
+const PORT = process.env.PORT || 3000;
 
 function getCodenames(lang) {
     let indices = [...Array(words[lang].length).keys()]
